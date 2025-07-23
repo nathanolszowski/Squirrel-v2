@@ -4,9 +4,31 @@ CSS selectors for scrapers
 - don't forget to escape slash bar into css selector
 - insert None for a css selector when you are using hook to scrape this particular data for a scraper
 """
-from typing import Optional, Dict
+from typing import Optional, Dict, TypedDict
 
-SELECTORS: Dict[str, Optional[str]] = {
+
+class SelectorFields(TypedDict, total=False):
+    reference: Optional[str]
+    contrat: Optional[str]
+    actif: Optional[str]
+    disponibilite: Optional[str]
+    surface: Optional[str]
+    division: Optional[str]
+    adresse: Optional[str]
+    nom_immeuble: Optional[str]
+    titre: Optional[str]
+    contact: Optional[str]
+    accroche: Optional[str]
+    amenagements: Optional[str]
+    prestations: Optional[str]
+    url_image: Optional[str]
+    latitude: Optional[str]
+    longitude: Optional[str]
+    prix_global: Optional[str]
+    loyer_global: Optional[str]
+
+
+SELECTORS: Dict[str, SelectorFields] = {
     "BNP": {
         "reference": "#presentation > div > div.col.s12.offer-hero--left > div.offer-hero--left--middle > div.line.space-between.share-businessid-line.hidden-mobile.hidden-tablet > div.line.mobile-column > div.business-id > p",
         "contrat": None,
