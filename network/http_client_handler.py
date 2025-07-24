@@ -6,9 +6,10 @@ It includes methods for making GET and POST requests with optional headers, user
 """
 
 import httpx
+import asyncio
 
 
-class ClientHandler:
+class AsyncClientHandler:
     """
     Class to handle HTTP requests.
     """
@@ -21,20 +22,35 @@ class ClientHandler:
             http_client: An instance of an HTTP client that implements methods like `get` and `post`.
         """
         self.proxy = proxy
-        self.client = httpx.Client(proxies=self.proxy) if self.proxy else httpx.Client()
+        self.client = (
+            httpx.AsyncClient(proxies=self.proxy) if self.proxy else httpx.AsyncClient()
+        )
 
-    def get_user_agent(self):
+    async def get_user_agent(self):
         pass
 
-    def get(self, url, headers=None):
+    async def get(self, url, headers=None):
         """
-        Effectue une requête GET sur l'URL spécifiée.
+        Sends a GET request to the specified URL.
 
         Args:
-            url (str): L'URL à laquelle faire la requête.
-            headers (dict, optional): En-têtes HTTP à inclure dans la requête.
+            url (str): URL to send the GET request to.
+            headers (dict, optional): HTTP headers.
 
         Returns:
-            Response: La réponse de la requête HTTP.
+            Response: Response from the GET request.
         """
-        return self.client.get(url, headers=headers)
+        return self.client.get(url, headers=None)
+
+    async def post(self, url, data=None, headers=None):
+        """
+        Sends a POST request to the specified URL.
+
+        Args:
+            url (str): URL to send the POST request to.
+            headers (dict, optional): HTTP headers.
+
+        Returns:
+            Response: Response from the POST request.
+        """
+        return self.client.post(url, data=data, headers=headers)

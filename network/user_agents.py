@@ -7,6 +7,8 @@ import random
 from bs4 import BeautifulSoup
 import json
 import os
+import asyncio
+import aiofiles
 from functools import cached_property
 from typing import Optional, Union, Dict
 from time import time
@@ -74,11 +76,11 @@ class ListUserAgent:
             UserAgent(ua) for ua in self.get_update_user_agents_list()
         ]
 
-    def get_user_agents_list(self) -> list[UserAgent]:
+    async def get_user_agents_list(self) -> list[UserAgent]:
         """Returns the complete ListUserAgents"""
         return self.liste_user_agents if self.liste_user_agents else []
 
-    def get_updated_url_user_agents(self) -> str:
+    async def get_updated_url_user_agents(self) -> str:
         """
         Fetches from the useragents.io sitemap the updated url with a list of user-agents available for scraping
 
@@ -94,7 +96,7 @@ class ListUserAgent:
         logger.info("Url to the latest updated list of user-agents has been retrieved")
         return actual_url_user_agents
 
-    def get_updated_user_agents_list(self) -> list[str]:
+    async def get_updated_user_agents_list(self) -> list[str]:
         """
         Retrieves user_agents strings from the latest up-to-date list
 
@@ -127,15 +129,17 @@ class ListUserAgent:
         )
         return user_agents_string
 
-    def read_cache_user_agents(self) -> Union[Dict[str, list[str]], None]:
+    async def read_cache_user_agents(self) -> Union[Dict[str, list[str]], None]:
         """Checks for the presence of the user-agents cache file"""
         logger.info("Checks for the presence of the user-agents cache file")
         try:
             if os.path.exists("user_agent.json"):
                 logger.info("Cache file with user-agents exists")
-                with open(self.user_agent_cache, "r", encoding="utf-8") as f:
-                    cache_user_agents = json.load(f)
-                return cache_user_agents
+                async with aiofiles.open(
+                    self.user_agent_cache, "r", encoding="utf-8"
+                ) as f:
+                    cache_user_agents = await f.read()
+                return json.loads(cache_user_agents)
             else:
                 return None
         except IOError as e:
@@ -147,7 +151,7 @@ class ListUserAgent:
                 f"[{self.user_agent_cache}] Error when reading JSON cache file : {e}"
             )
 
-    def get_cache_url_user_agents(self) -> Optional[str]:
+    async def get_cache_url_user_agents(self) -> Optional[str]:
         """
         Retrieves the url of the latest user-agents list from our cache
 
@@ -159,21 +163,23 @@ class ListUserAgent:
             return next(iter(cache.keys()), None)
         return None
 
-    def compare_url_actualise_url_cache(self) -> bool:
+    async def compare_url_actualise_url_cache(self) -> bool:
         """
         Compares the updated url from useragents.io with the url present in our JSON cache
         """
         cache_url = self.get_cache_url_user_agents()
         return self.actual_url_user_agents == cache_url
 
-    def sauvegarder_cache_user_agents(self, user_agents: list[str]) -> None:
+    async def sauvegarder_cache_user_agents(self, user_agents: list[str]) -> None:
         """Saves the list of user-agents in the JSON cache"""
         logger.info("Starting to save the user-agents list in the JSON cache")
         try:
             liste_user_agents = user_agents
             contenu_actualise = {self.actual_url_user_agents: liste_user_agents}
-            with open(self.user_agent_cache, "w", encoding="utf-8") as f:
-                json.dump(contenu_actualise, f, ensure_ascii=False, indent=4)
+            async with aiofiles.open(self.user_agent_cache, "w", encoding="utf-8") as f:
+                await f.write(
+                    json.dump(contenu_actualise, f, ensure_ascii=False, indent=4)
+                )
         except IOError as e:
             logger.error(
                 f"[{self.user_agent_cache}] Error with JSON cache file openning : {e}"
@@ -183,7 +189,7 @@ class ListUserAgent:
                 f"[{self.user_agent_cache}] Error when reading JSON cache file : {e}"
             )
 
-    def get_update_user_agents_list(self) -> list[str]:
+    async def get_update_user_agents_list(self) -> list[str]:
         """Returns the list of user-agents to update or not"""
         logger.info(
             "Start retrieving the updated list of user-agents, from the cache if possible."
@@ -198,7 +204,7 @@ class ListUserAgent:
             self.sauvegarder_cache_user_agents(user_agents)
             return user_agents
 
-    def notation_user_agent(self, user_agent: UserAgent) -> int:
+    async def notation_user_agent(self, user_agent: UserAgent) -> int:
         """
         Rates a user-agent according to its characteristics
 
@@ -241,7 +247,7 @@ class ListUserAgent:
             notation -= 100
         return notation
 
-    def get_user_agent(self) -> str:
+    async def get_user_agent(self) -> str:
         """
         Returns a user-agent chosen according to its rating and its last usage date
 
