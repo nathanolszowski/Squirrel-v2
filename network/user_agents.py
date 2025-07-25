@@ -7,6 +7,7 @@ import random
 from bs4 import BeautifulSoup
 import json
 import os
+import httpx
 import aiofiles
 from functools import cached_property
 from typing import Optional, Union, Dict
@@ -17,7 +18,6 @@ from config.squirrel_settings import (
     USER_AGENT_UPDATE,
     FICHIER_CACHE_USER_AGENT,
 )
-from network.http_client_handler import AsyncClientHandler
 
 logger = logging.getLogger(__name__)
 
@@ -63,21 +63,17 @@ class ListUserAgent:
 
     def __init__(
         self,
-        http_client,
         user_agent_cache=FICHIER_CACHE_USER_AGENT,
         enabling_update=USER_AGENT_UPDATE,
     ):
         self.user_agent_cache: str = user_agent_cache
         self.enabling_update: bool = enabling_update
-        self.http_client: AsyncClientHandler = http_client
-        self.actual_url_user_agents: str = self.get_updated_url_user_agents()
-        self.liste_user_agents: list[UserAgent] = [
-            UserAgent(ua) for ua in self.get_update_user_agents_list()
-        ]
 
-    async def get_user_agents_list(self) -> list[UserAgent]:
+    async def set_user_agents_list(self) -> None:
         """Returns the complete ListUserAgents"""
-        return self.liste_user_agents if self.liste_user_agents else []
+        self.liste_user_agents: list[UserAgent] = [
+            UserAgent(ua) for ua in await self.get_update_user_agents_list()
+        ]
 
     async def get_updated_url_user_agents(self) -> str:
         """
@@ -88,13 +84,34 @@ class ListUserAgent:
         """
         logger.info("Retrieving the url to the latest updated list of user-agents")
         url_usergantsio: str = "https://useragents.io/sitemaps/useragents.xml"
-        async with self.http_client as client:
-            response = await client.get(url_usergantsio)
-        soup = BeautifulSoup(response.text, "xml")
-        actual_url_user_agents = soup.find_all("sitemap")[-1]
-        actual_url_user_agents = actual_url_user_agents.find("loc").text
-        logger.info("Url to the latest updated list of user-agents has been retrieved")
-        return actual_url_user_agents
+        try:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                response = await client.get(url_usergantsio)
+                soup = BeautifulSoup(response.text, "xml")
+                actual_url_user_agents = soup.find_all("sitemap")[-1]
+                actual_url_user_agents = actual_url_user_agents.find("loc").text
+                logger.info(
+                    "Url to the latest updated list of user-agents has been retrieved"
+                )
+            return actual_url_user_agents
+        except httpx.HTTPError as e:
+            logger.error(
+                f"[{url_usergantsio}] Error when attempting to reach useragents.io site : {e}"
+            )
+            # If the site url is not available, use the cached url instead
+            return await self.get_cache_url_user_agents()
+        except IndexError as e:
+            logger.error(
+                f"[{url_usergantsio}] Unable to find the last updated url from useragents.io because the path 'sitemap' doesn't exist : {e}"
+            )
+            # If the site url is not available, use the cached url instead
+            return await self.get_cache_url_user_agents()
+        except AttributeError as e:
+            logger.error(
+                f"[{url_usergantsio}] Unable to find the last updated url from useragents.io because the 'loc' tag doesn't exist : {e}"
+            )
+            # If the site url is not available, use the cached url instead
+            return await self.get_cache_url_user_agents()
 
     async def get_updated_user_agents_list(self) -> list[str]:
         """
@@ -104,34 +121,63 @@ class ListUserAgent:
             user_agents (list[str]): String representing the url of the latest up-to-date user-agents sitemap
         """
         logger.info("Retrieves updated user_agents list")
-        response = self.http_client.get(self.actual_url_user_agents)
-        sitemap_actuelle = BeautifulSoup(response.text, "xml")
-        user_agents_liens = [
-            url.find("loc").text for url in sitemap_actuelle.find_all("url")
+        default_user_agents_list = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
         ]
-        user_agents_string = []
-        for url in user_agents_liens:
-            response = self.http_client.get(url)
-            soup = BeautifulSoup(response.content, "html.parser")
-            ua_chaine = soup.select_one("body > div:nth-child(1) > main > h1")
-            if ua_chaine:
-                ua_chaine = ua_chaine.get_text()
-                if any(
-                    ua_chaine.startswith(browser) for browser in ["Mozilla", "Opera"]
-                ):
-                    user_agents_string.append(ua_chaine)
-            else:
-                logger.warning(
-                    f"CSS selector doesn't find any user-agents, it may be broke : {url}"
-                )
-        logger.info(
-            f"Found {len(user_agents_string)} updated user-agents available for scraping"
-        )
-        return user_agents_string
+        try:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                response = await client.get(self.actual_url_user_agents)
+                actual_url = BeautifulSoup(response.text, "xml")
+                user_agents_liens = [
+                    url.find("loc").text for url in actual_url.find_all("url")
+                ]
+        except httpx.HTTPError as e:
+            logger.error(
+                f"[{self.actual_url_user_agents}] Error retrieving last updated list of user-agents : {e}"
+            )
+            return default_user_agents_list
+        except IndexError as e:
+            logger.error(
+                f"[{self.actual_url_user_agents}] Error retrieving value from last updated user-agents list because 'loc' tag doesn't exist : {e}"
+            )
+            return default_user_agents_list
+        except AttributeError as e:
+            logger.error(
+                f"[{self.actual_url_user_agents}] Error retrieving value from last updated user-agents list because 'url' tag doesn't exist : {e}"
+            )
+            return default_user_agents_list
+        else:
+            user_agents_string = []
+            for url in user_agents_liens:
+                response = await client.get(url)
+                soup = BeautifulSoup(response.content, "html.parser")
+                ua_chaine = soup.select_one("body > div:nth-child(1) > main > h1")
+                if ua_chaine:
+                    ua_chaine = ua_chaine.get_text()
+                    if any(
+                        ua_chaine.startswith(browser)
+                        for browser in ["Mozilla", "Opera"]
+                    ):
+                        user_agents_string.append(ua_chaine)
+                else:
+                    logger.warning(
+                        f"CSS selector doesn't find any user-agents, it may be broke : {url}"
+                    )
+            logger.info(
+                f"Found {len(user_agents_string)} updated user-agents available for scraping"
+            )
+            return user_agents_string
 
-    async def read_cache_user_agents(self) -> Union[Dict[str, list[str]], None]:
+    async def read_cache_user_agents(self) -> dict[str, list[str]]:
         """Checks for the presence of the user-agents cache file"""
         logger.info("Checks for the presence of the user-agents cache file")
+        safe_callback: dict[str, list[str]] = {
+            "absolute_url_not_found": [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
+            ]
+        }
         try:
             if os.path.exists("user_agent.json"):
                 logger.info("Cache file with user-agents exists")
@@ -139,35 +185,47 @@ class ListUserAgent:
                     self.user_agent_cache, "r", encoding="utf-8"
                 ) as f:
                     cache_user_agents = await f.read()
-                return json.loads(cache_user_agents)
+                data = json.loads(cache_user_agents)
+                if isinstance(data, dict) and all(
+                    isinstance(v, list) and all(isinstance(i, str) for i in v)
+                    for v in data.values()
+                ):
+                    return data
+                else:
+                    logger.error(
+                        f"[{self.user_agent_cache}] It seems that the cache file is not in the excepted format."
+                    )
+                    return safe_callback
             else:
-                return None
-        except IOError as e:
-            logger.error(
-                f"[{self.user_agent_cache}] Error with JSON cache file openning : {e}"
-            )
+                logger.error(
+                    f"[{self.user_agent_cache}] Error when openning JSON cache file"
+                )
+                return safe_callback
         except json.JSONDecodeError as e:
             logger.error(
                 f"[{self.user_agent_cache}] Error when reading JSON cache file : {e}"
             )
+            return safe_callback
 
-    async def get_cache_url_user_agents(self) -> Optional[str]:
+    async def get_cache_url_user_agents(self) -> str:
         """
         Retrieves the url of the latest user-agents list from our cache
 
         Returns:
             Optional[str]: Represents the url of the latest user-agents list from the cache
         """
-        cache = self.read_cache_user_agents()
+        cache = await self.read_cache_user_agents()
         if cache:
-            return next(iter(cache.keys()), None)
-        return None
+            return next(iter(cache.keys()), "absolute_url_not_found")
+        else:
+            return "absolute_url_not_found"
 
     async def compare_url_actualise_url_cache(self) -> bool:
         """
         Compares the updated url from useragents.io with the url present in our JSON cache
         """
-        cache_url = self.get_cache_url_user_agents()
+        self.actual_url_user_agents = await self.get_updated_url_user_agents()
+        cache_url = await self.get_cache_url_user_agents()
         return self.actual_url_user_agents == cache_url
 
     async def sauvegarder_cache_user_agents(self, user_agents: list[str]) -> None:
@@ -178,7 +236,7 @@ class ListUserAgent:
             contenu_actualise = {self.actual_url_user_agents: liste_user_agents}
             async with aiofiles.open(self.user_agent_cache, "w", encoding="utf-8") as f:
                 await f.write(
-                    json.dump(contenu_actualise, f, ensure_ascii=False, indent=4)
+                    json.dumps(contenu_actualise, ensure_ascii=False, indent=4)
                 )
         except IOError as e:
             logger.error(
@@ -194,17 +252,17 @@ class ListUserAgent:
         logger.info(
             "Start retrieving the updated list of user-agents, from the cache if possible."
         )
-        if self.compare_url_actualise_url_cache() or not self.enabling_update:
+        if await self.compare_url_actualise_url_cache() or not self.enabling_update:
             logger.info("URL unchanged or update not activated. Loading from cache.")
-            cache = self.read_cache_user_agents()
+            cache = await self.read_cache_user_agents()
             return list(cache.values())[0] if cache else []
         else:
             logger.info("URL has changed. Update required.")
-            user_agents = self.get_updated_user_agents_list()
-            self.sauvegarder_cache_user_agents(user_agents)
+            user_agents = await self.get_updated_user_agents_list()
+            await self.sauvegarder_cache_user_agents(user_agents)
             return user_agents
 
-    async def notation_user_agent(self, user_agent: UserAgent) -> int:
+    def scored_user_agent(self, user_agent: UserAgent) -> int:
         """
         Rates a user-agent according to its characteristics
 
@@ -247,9 +305,9 @@ class ListUserAgent:
             notation -= 100
         return notation
 
-    async def get_user_agent(self) -> str:
+    def get_user_agent(self) -> str:
         """
-        Returns a user-agent chosen according to its rating and its last usage date
+        Public method to return a user-agent chosen according to its rating and its last usage date
 
         Returns:
             (str): Returns a user-agent chosen according to its rating and its last usage date
@@ -257,11 +315,11 @@ class ListUserAgent:
         # Calculates the rating of each user-agent
         logger.info("Calculating the rating of each user-agent")
         user_agent_notes = []
-        for user_agent in self.get_user_agents_list():
-            user_agent_notes.append(self.notation_user_agent(user_agent))
+        for user_agent in self.liste_user_agents:
+            user_agent_notes.append(self.scored_user_agent(user_agent))
         # Select a user-agent
         user_agent = random.choices(
-            self.get_user_agents_list(),
+            self.liste_user_agents,
             weights=user_agent_notes,
             k=1,
         )[0]
