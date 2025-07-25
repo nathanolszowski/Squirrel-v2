@@ -7,7 +7,6 @@ import random
 from bs4 import BeautifulSoup
 import json
 import os
-import asyncio
 import aiofiles
 from functools import cached_property
 from typing import Optional, Union, Dict
@@ -18,7 +17,7 @@ from config.squirrel_settings import (
     USER_AGENT_UPDATE,
     FICHIER_CACHE_USER_AGENT,
 )
-from network.http_client_handler import ClientHandler
+from network.http_client_handler import AsyncClientHandler
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ class ListUserAgent:
     ):
         self.user_agent_cache: str = user_agent_cache
         self.enabling_update: bool = enabling_update
-        self.http_client: ClientHandler = http_client
+        self.http_client: AsyncClientHandler = http_client
         self.actual_url_user_agents: str = self.get_updated_url_user_agents()
         self.liste_user_agents: list[UserAgent] = [
             UserAgent(ua) for ua in self.get_update_user_agents_list()
@@ -89,7 +88,8 @@ class ListUserAgent:
         """
         logger.info("Retrieving the url to the latest updated list of user-agents")
         url_usergantsio: str = "https://useragents.io/sitemaps/useragents.xml"
-        response = self.http_client.get(url_usergantsio)
+        async with self.http_client as client:
+            response = await client.get(url_usergantsio)
         soup = BeautifulSoup(response.text, "xml")
         actual_url_user_agents = soup.find_all("sitemap")[-1]
         actual_url_user_agents = actual_url_user_agents.find("loc").text
@@ -259,12 +259,12 @@ class ListUserAgent:
         user_agent_notes = []
         for user_agent in self.get_user_agents_list():
             user_agent_notes.append(self.notation_user_agent(user_agent))
-        # Sélectionne un user-agent
+        # Select a user-agent
         user_agent = random.choices(
             self.get_user_agents_list(),
             weights=user_agent_notes,
             k=1,
         )[0]
-        # Met à jour l'attribut de dernière utilisation
+        # Update the last used time
         user_agent.last_used = time()
         return str(user_agent)
