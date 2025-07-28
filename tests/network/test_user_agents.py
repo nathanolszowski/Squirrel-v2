@@ -5,12 +5,6 @@ Testing module for user-agents handling
 from network.user_agents import UserAgent, ListUserAgent
 import pytest
 
-"""get_updated_url
-get_updated_user_agents_list
-read_cache_user_agents
-save_cache_user_agents
-get_user_agent
-scored_user_agent"""
 
 class TestUserAgent:
     """Test class for UserAgent class"""
@@ -31,11 +25,11 @@ class TestUserAgent:
             (
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0",
                 "Firefox",
-                "Linux",
+                "Ubuntu",
             ),
             (
                 "Mozilla/5.0 (Linux; Android 11; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36",
-                "Chrome",
+                "Chrome Mobile",
                 "Android",
             ),
         ],
@@ -45,3 +39,13 @@ class TestUserAgent:
         assert ua.browser == expected_browser
         assert ua.os == expected_os
         assert isinstance(ua.browser_version, int)
+
+class TestListUserAgent:
+    """Test class for ListUserAgent class
+        get_updated_url
+        get_updated_user_agents_list
+        read_cache_user_agents
+        save_cache_user_agents
+        get_user_agent
+        scored_user_agent"""
+    

@@ -1,4 +1,4 @@
-# Squirrel Scrapers V.1
+# Squirrel Scrapers V.2
 
 Ce projet est une collection de scrapers pour extraire des données d'annonces immobilières de différents sites d'Agence.
 Il permet d'avoir une vue du marché complète pour le bureaux en Île-de-France, locaux d'activités et entrepôts en France.

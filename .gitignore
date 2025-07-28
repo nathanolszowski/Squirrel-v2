@@ -1,0 +1,6 @@
+/exports
+/datas
+/logs
+*.pyc
+*.pyo
+__pycache__/
