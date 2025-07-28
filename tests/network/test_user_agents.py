@@ -40,12 +40,21 @@ class TestUserAgent:
         assert ua.os == expected_os
         assert isinstance(ua.browser_version, int)
 
-class TestListUserAgent:
+class TestAsyncListUserAgent:
     """Test class for ListUserAgent class
-        get_updated_url
-        get_updated_user_agents_list
-        read_cache_user_agents
-        save_cache_user_agents
-        get_user_agent
         scored_user_agent"""
+        
+    @pytest.fixture
+    async def list_user_agent():
+        ua_strings = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0",
+        "Mozilla/5.0 (Linux; Android 11; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36"
+        ]
+        ua = ListUserAgent()
+        await ua.load_user_agents_list(ua_strings)
+        return ua
     
+    def test_get_updated_url(self):
+        pass

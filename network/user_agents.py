@@ -69,11 +69,18 @@ class ListUserAgent:
         self.user_agent_cache: str = user_agent_cache
         self.enabling_update: bool = enabling_update
 
-    async def set_user_agents_list(self) -> None:
+    async def load_user_agents_list(self, user_agents_list: list[str]) -> list[UserAgent]:
         """Returns the complete ListUserAgents"""
+        if not isinstance(user_agents_list, list) or not all(isinstance(ua, str) for ua in user_agents_list):
+            raise ValueError("User agents list must be a list of strings.")
         self.liste_user_agents: list[UserAgent] = [
-            UserAgent(ua) for ua in await self.get_update_user_agents_list()
+            UserAgent(ua) for ua in user_agents_list
         ]
+        return self.liste_user_agents
+        
+    async def refresh_user_agents_list(self):
+        user_agents_list = await self.get_update_user_agents_list()
+        return await self.load_user_agents_list(user_agents_list)
 
     async def get_updated_url_user_agents(self) -> str:
         """
