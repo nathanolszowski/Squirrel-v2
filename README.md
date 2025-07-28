@@ -39,20 +39,26 @@ Liste des sites d'agences disponibles :
 ```
 Squirrel/
 ├── config/
-│   ├── settings.py      # Configuration globale
-│   └── selectors.py     # Sélecteurs CSS par site
+│   ├── scrapers_config.py      # Configuration globale
+│   └── scrapers_selectors.py     # Sélecteurs CSS par site
+│   └── squirrel_settings.py     # Congiguration des scrapers
 ├── core/
-│   ├── base_scraper.py      # Classe de base abstraite
-│   ├── selenium_scraper.py  # Base pour scrapers Selenium
-│   └── requests_scraper.py  # Base pour scrapers Requests
+│   ├── api_scraper.py
+│   ├── base_scraper.py
+│   ├── http_scraper.py 
+│   └── url_discovery_strategy.py  # Stratégie de découverte d'url
 ├── scrapers/
 │   ├── bnp.py
 │   ├── jll.py
 │   └── ...
-├── utils/
-│   └── data_pipelines        # Fonctions de nettoyage des données
-│   └── export.py             # Fonctions d'export JSON (créé un nouveau dossier exports à la racine)
+├── data/
+├── exports/
+├── logs/
+├── network/
+│   └── http_client_handler     
 │   └── user_agent.py         # Générateur d'user-agents
+├── tests/
+├── utils/
 │   └── logging_config        # Initialisation du logger (créé un nouveau dossier logs à la racine)
 └── main.py             # Point d'entrée
 ```

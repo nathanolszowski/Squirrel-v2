@@ -12,7 +12,6 @@ save_cache_user_agents
 get_user_agent
 scored_user_agent"""
 
-
 class TestUserAgent:
     """Test class for UserAgent class"""
 
