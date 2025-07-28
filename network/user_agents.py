@@ -320,7 +320,6 @@ class ListUserAgent:
             (str): Returns a user-agent chosen according to its rating and its last usage date
         """
         # Calculates the rating of each user-agent
-        logger.info("Calculating the rating of each user-agent")
         user_agent_notes = []
         for user_agent in self.liste_user_agents:
             user_agent_notes.append(self.scored_user_agent(user_agent))

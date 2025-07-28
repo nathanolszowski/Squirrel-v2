@@ -4,7 +4,7 @@ Testing module for user-agents handling
 """
 from network.user_agents import UserAgent, ListUserAgent
 import pytest
-
+pytest_plugins = ["pytest_asyncio"]
 
 class TestUserAgent:
     """Test class for UserAgent class"""
@@ -45,7 +45,7 @@ class TestAsyncListUserAgent:
         scored_user_agent"""
         
     @pytest.fixture
-    async def list_user_agent():
+    async def list_user_agent(self):
         ua_strings = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
@@ -56,5 +56,7 @@ class TestAsyncListUserAgent:
         await ua.load_user_agents_list(ua_strings)
         return ua
     
-    def test_get_updated_url(self):
-        pass
+    async def test_get_updated_url(self, list_user_agent):
+        url = await list_user_agent.get_updated_url()
+        assert "https://useragents.io/sitemaps/created/" in url
+        
