@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Fonctions pour gérer les user_agents
+Handles user-agents management.
+This module provides a class 'ListUserAgent' that manages a list of user-agents.
 """
 
 import random
@@ -10,7 +11,6 @@ import os
 import httpx
 import aiofiles
 from functools import cached_property
-from typing import Optional, Union, Dict
 from time import time
 from ua_parser import user_agent_parser
 import logging
@@ -228,7 +228,7 @@ class ListUserAgent:
         cache_url = await self.get_cache_url_user_agents()
         return self.actual_url_user_agents == cache_url
 
-    async def sauvegarder_cache_user_agents(self, user_agents: list[str]) -> None:
+    async def save_cache_user_agents(self, user_agents: list[str]) -> None:
         """Saves the list of user-agents in the JSON cache"""
         logger.info("Starting to save the user-agents list in the JSON cache")
         try:
@@ -259,7 +259,7 @@ class ListUserAgent:
         else:
             logger.info("URL has changed. Update required.")
             user_agents = await self.get_updated_user_agents_list()
-            await self.sauvegarder_cache_user_agents(user_agents)
+            await self.save_cache_user_agents(user_agents)
             return user_agents
 
     def scored_user_agent(self, user_agent: UserAgent) -> int:
