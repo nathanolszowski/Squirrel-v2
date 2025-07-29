@@ -70,7 +70,7 @@ class ListUserAgent:
         self.enabling_update: bool = enabling_update
 
     async def load_user_agents_list(self, user_agents_list: list[str]) -> list[UserAgent]:
-        """Returns the complete ListUserAgents"""
+        """Loads and returns the complete ListUserAgents"""
         if not isinstance(user_agents_list, list) or not all(isinstance(ua, str) for ua in user_agents_list):
             raise ValueError("User agents list must be a list of strings.")
         self.liste_user_agents: list[UserAgent] = [
@@ -79,6 +79,7 @@ class ListUserAgent:
         return self.liste_user_agents
         
     async def refresh_user_agents_list(self):
+        """Refresh the complete ListUserAgents from the latest user-agents list"""
         user_agents_list = await self.get_update_user_agents_list()
         return await self.load_user_agents_list(user_agents_list)
 
@@ -208,7 +209,12 @@ class ListUserAgent:
                     f"[{self.user_agent_cache}] Error when openning JSON cache file"
                 )
                 return safe_callback
-        except json.JSONDecodeError as e:
+        except (OSError, TypeError, RuntimeError) as e:
+            logger.error(
+                f"[{self.user_agent_cache}] Error when openning JSON cache file : {e}"
+            )
+            return safe_callback
+        except ValueError as e:
             logger.error(
                 f"[{self.user_agent_cache}] Error when reading JSON cache file : {e}"
             )
