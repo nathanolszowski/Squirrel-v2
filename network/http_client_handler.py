@@ -6,14 +6,18 @@ It includes methods for making GET and POST requests with optional headers, user
 """
 
 import httpx
+from network.user_agents import ListUserAgent
+import logging
+from config.squirrel_settings import REQUEST_TIMEOUT
 
+logger = logging.getLogger(__name__)
 
 class AsyncClientHandler:
     """
     Class to handle HTTP requests.
     """
 
-    def __init__(self, proxy):
+    def __init__(self, proxy: str):
         """
         Initializes the ClientHandler with a specific HTTP client.
 
@@ -21,12 +25,19 @@ class AsyncClientHandler:
             http_client: An instance of an HTTP client that implements methods like `get` and `post`.
         """
         self.proxy = proxy
-        self._client = httpx.AsyncClient()
+        self.user_agent_liste: ListUserAgent | None = None
+        
+    async def setup_client(self) -> httpx.AsyncClient:
+        """Sets up the HTTP client with settings."""
+        self.user_agent = await self.get_user_agent()
+        self.client = httpx.AsyncClient(proxy=self.proxy,
+                        headers={"User-Agent": self.user_agent},
+                        timeout=REQUEST_TIMEOUT,
+                        follow_redirects=True,
+                    )
+        return self.client
 
-    async def get_user_agent(self):
-        pass
-
-    async def get(self, url, headers=None):
+    async def client_get_method(self, url: str, headers=None) -> httpx.Response:
         """
         Sends a GET request to the specified URL.
 
@@ -37,9 +48,18 @@ class AsyncClientHandler:
         Returns:
             Response: Response from the GET request.
         """
-        return await self._client.get(url, headers=None)
+        if not self.client:
+            await self.setup_client()
 
-    async def post(self, url, data=None, headers=None):
+        final_headers = self.client.headers.copy()
+        if headers:
+            final_headers.update(headers)
+
+        response = await self.client.get(url, headers=final_headers)
+        response.raise_for_status()
+        return response
+
+    async def client_post_method(self, url: str, data=None, headers=None) -> httpx.Response:
         """
         Sends a POST request to the specified URL.
 
@@ -50,13 +70,39 @@ class AsyncClientHandler:
         Returns:
             Response: Response from the POST request.
         """
-        return await self._client.post(url, data=data, headers=headers)
+        if not self.client:
+            await self.setup_client()
 
-    async def close(self):
-        await self._client.aclose()
+        final_headers = self.client.headers.copy()
+        if headers:
+            final_headers.update(headers)
 
-    async def __aenter__(self):
-        return self
+        response = await self.client.post(url, data=data, headers=final_headers)
+        response.raise_for_status()
+        return response
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.close()
+    async def close_client(self) -> None:
+        """Close the client properly"""
+        if self.client:
+            await self.client.aclose()
+
+    async def init_user_agents_list(self) -> ListUserAgent:
+        """Returns a user-agents list for header usage.
+        
+        Returns:
+            self.user_agent_liste : a list of user-agents.
+        """
+        self.user_agent_liste = ListUserAgent()
+        await self.user_agent_liste.refresh_user_agents_list()
+        return self.user_agent_liste         
+
+    async def get_user_agent(self):
+        """Returns a user-agent string for header usage.
+        
+        Returns:
+            self.user_agent : a scored user-agents.
+        """
+        if self.user_agent_liste is None:
+            self.user_agent_liste = await self.init_user_agents_list()
+        user_agent = self.user_agent_liste.get_user_agent()
+        return user_agent
