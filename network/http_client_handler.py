@@ -26,6 +26,8 @@ class AsyncClientHandler:
         """
         self.proxy = proxy
         self.user_agent_liste: ListUserAgent | None = None
+        self.failed_urls: list[str] = []
+        self.retry_attempts: int = 3
         
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
@@ -37,7 +39,7 @@ class AsyncClientHandler:
                     )
         return self.client
 
-    async def client_get_method(self, url: str, headers=None) -> httpx.Response:
+    async def client_get_method(self, url: str, headers: dict | None) -> httpx.Response:
         """
         Sends a GET request to the specified URL.
 
@@ -59,7 +61,7 @@ class AsyncClientHandler:
         response.raise_for_status()
         return response
 
-    async def client_post_method(self, url: str, data=None, headers=None) -> httpx.Response:
+    async def client_post_method(self, url: str, data: dict | None, headers: dict | None) -> httpx.Response:
         """
         Sends a POST request to the specified URL.
 
@@ -81,6 +83,10 @@ class AsyncClientHandler:
         response.raise_for_status()
         return response
 
+    async def client_retry_request(self):
+        """Method to retry a request if it fails."""
+        pass
+    
     async def close_client(self) -> None:
         """Close the client properly"""
         if self.client:
