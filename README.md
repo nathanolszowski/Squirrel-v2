@@ -1,51 +1,52 @@
-# Squirrel Scrapers V.2
+# Squirrel Scraper V.2
 
-Ce projet est une collection de scrapers pour extraire des données d'annonces immobilières de différents sites d'Agence.
-Il permet d'avoir une vue du marché complète pour le bureaux en Île-de-France, locaux d'activités et entrepôts en France.
-Liste des sites d'agences disponibles :
+This project is a collection of scrapers to extract real estate ad data from different Agency sites.
+It allows you to have a complete market view for offices in Île-de-France, business premises and warehouses in France.
+List of available agency sites:
 - CBRE
 - BNP
-- JLL /!/ En panne pour le moment /!/
+- JLL /!/ Disabled /!/
 - AlexBolton
 - Cushman & Wakefield
 - Knight Frank
 - ArthurLoyd
 - Savills
 
-## Etat du projet et amélioration à venir
+## Project status
 
-1. Priorité 1 :
-- Perfectionner la récupération des longitude/latitude et des adresses pour toutes les agences
-- Homogénéiser les données récoltées
-- Gérer les doublons d'offres :
-   - comparer lat/long, adresse, accroche, titre et surface totale
+1. Priority 1 :
+- Improve the recovery of longitude/latitude and addresses for all agencies
+- Homogenize collected datas
+- Manage duplicate :
+   - compare lat/long, adresse, accroche, titre et surface totale
 
-2. Priorité 2 :
-- Système de cache pour éviter de re-scraper les mêmes pages trop souvent ?
-- Repérage d'un trop grand nombre de N/A sur certaines valeurs pour surveiller la présence du bon sélecteur
+2. Priority 2 :
+- Cache system to avoid re-scraping the same pages too often?
+- Identification of too large number of None values
 
-3. Priorité 3 :
-- Travail sur la factorisation du code et la vitesse de scraping
-- Ajout des secteurs de marché
-- Comparer le nouvel export avec l'ancien
-- Barre de progression des traitements
-- Mise en place de retry mechanisms pour les requêtes échouées
-- Parallélisation des scraping avec asyncio (asyncio + aiohttp)
-- Tests unitaires et d'intégration ?
+3. Priority 3 :
+- Work on code factorization and scraping speed
+- Addition of market sectors
+- Compare the new export with the old one
+- Progress bar
+- Setting up retry mechanisms for failed requests
+- Asynchronous scraping
+- Tests
 
 
-## Structure du projet
+## Project structure
 
 ```
 Squirrel/
 ├── config/
-│   ├── scrapers_config.py      # Configuration globale
-│   └── scrapers_selectors.py     # Sélecteurs CSS par site
-│   └── squirrel_settings.py     # Congiguration des scrapers
+│   ├── scrapers_config.py      # Configuration for scrapers
+│   └── scrapers_selectors.py     # CSS selectors by scraper
+│   └── squirrel_settings.py     # Global configuration
 ├── core/
-│   ├── api_scraper.py
-│   ├── base_scraper.py
-│   ├── http_scraper.py 
+│   ├── api_scraper.py           # Class for api scraper
+│   ├── base_scraper.py          # Base class for all scrapers
+│   ├── http_scraper.py          # Class for http scraper
+│   ├── scraper_factory.py        # Factory for create a new scraper
 │   └── url_discovery_strategy.py  # Stratégie de découverte d'url
 ├── scrapers/
 │   ├── bnp.py
@@ -55,42 +56,44 @@ Squirrel/
 ├── exports/
 ├── logs/
 ├── network/
-│   └── http_client_handler     
-│   └── user_agent.py         # Générateur d'user-agents
+│   └── http_client_handler     # Http client handler for web scraping requests
+│   └── user_agent.py         # User-agents generator
 ├── tests/
+│   └── network/
+│       └── test_user_agents
 ├── utils/
-│   └── logging_config        # Initialisation du logger (créé un nouveau dossier logs à la racine)
-└── main.py             # Point d'entrée
+│   └── logging_config        # Initialisation du logger (create a log file in logs/ folder)
+└── main.py             # Entry point
 ```
 
 ## Installation
 
-1. Créer un environnement virtuel Python :
+1. Create a virtual environnement :
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
 
-2. Installer les dépendances :
+2. Install dependencies :
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Ajouter votre proxy :
+3. Add your proxy adress :
 `main.py`
 ```
     PROXY = "YOUR PROXY ADRESS"
 ```
 
-## Utilisation
+## Usage
 
-Pour lancer tous les scrapers :
+Starting program with :
 ```bash
 python main.py
 ```
 
-Format de sortie JSON :
+JSON Format :
 ```
 {
    "confrere": "BNP",
@@ -112,31 +115,33 @@ Format de sortie JSON :
 }
 ```
 
-## Fonctionnalités
+## Fonctionnalities
 
-- Extraction des annonces de bureaux en Île-de-France, locaux d'activités et logistique en France
-- Support de plusieurs sites d'annonces (BNP, JLL, etc.)
-- Export des données en JSON
-- Logging détaillé
-- Gestion des user-agents
-- Utilisation de proxy
+- Extraction of listings for offices in the Paris region and logistics in France
+- Support for several listings sites (BNP, JLL, etc.)
+- Data export in JSON
+- Asynchronous scraping
+- Detailed logging
+- User-agent management
+- Use of proxy
 
-## Ajouter un nouveau scraper
+## Add a new scraper
 
 1. Créer un nouveau fichier dans le dossier `scrapers/`
-2. Hériter de `RequestsScraper` ou `SeleniumScraper`
+2. Hériter de `BaseScraper`
 3. Implémenter la méthode `post_traitement_hook()` si besoin spécifique du scraper
-4. Ajouter les sélecteurs dans `config/selectors.py`
-5. Ajouter le sitemap dans `config/settings.py`
+4. Ajouter les sélecteurs dans `config/scrapers_selectors.py`
+5. Ajouter le sitemap dans `config/scrapers_config.py`
 6. Instancier le scraper dans `main.py`
 
-## Maintenance
+## Maintain
 
-- Les sélecteurs sont centralisés dans `config/selectors.py`
-- La configuration globale est dans `config/settings.py`
-- Les logs permettent de suivre l'exécution et diagnostiquer les erreurs
+- CSS selectors are centralised in `config/scrapers_selectors.py`
+- Global configuration in `config/squirrel_settings.py`
+- Tests are centralised in `tests/`
+- Logs allow you to monitor execution and diagnose errors
 
-## Résolution d'erreur
+## Error handling
 
 - [Errno 11001] getaddrinfo failed
 └──> Traduit l'argument host/port en une séquence de 5 tuples contenant tous les arguments nécessaires à la création d'une socket connectée à ce service. host est un nom de domaine, une représentation sous forme de chaîne d'une adresse IPv4/v6 ou None.
