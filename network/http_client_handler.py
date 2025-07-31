@@ -27,6 +27,7 @@ class AsyncClientHandler:
             http_client: An instance of an HTTP client that implements methods like `get` and `post`.
         """
         self.proxy = proxy
+        self.proxy_ok: bool = False
         self.user_agent_liste: ListUserAgent | None = None
         self.failed_urls: list[str] = []
         self.request_count: int = 0
@@ -36,8 +37,8 @@ class AsyncClientHandler:
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
         self.user_agent = await self.get_user_agent()
-        self.proxy = await self.get_proxy()
-        self.client = httpx.AsyncClient(proxy=self.proxy,
+        proxy = await self.get_proxy()
+        self.client = httpx.AsyncClient(proxy=proxy,
                         headers={"User-Agent": self.user_agent},
                         timeout=REQUEST_TIMEOUT,
                         follow_redirects=True,
@@ -129,7 +130,7 @@ class AsyncClientHandler:
             self.proxy (str | None) : the proxy used by the client.
             None if no proxy is available or if the proxy is invalid.
         """
-        if not self.proxy:
+        if self.proxy is None:
             logger.info("No proxy available.")
             return None
 
