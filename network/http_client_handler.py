@@ -8,7 +8,9 @@ It includes methods for making GET and POST requests with optional headers, user
 import httpx
 from network.user_agents import ListUserAgent
 import logging
-from config.squirrel_settings import REQUEST_TIMEOUT
+import random
+import asyncio
+from config.squirrel_settings import REQUEST_TIMEOUT, PROXY
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class AsyncClientHandler:
     Class to handle HTTP requests.
     """
 
-    def __init__(self, proxy: str):
+    def __init__(self, proxy: str | None = None):
         """
         Initializes the ClientHandler with a specific HTTP client.
 
@@ -28,69 +30,74 @@ class AsyncClientHandler:
         self.user_agent_liste: ListUserAgent | None = None
         self.failed_urls: list[str] = []
         self.retry_attempts: int = 3
+        self.reset_threshold = random.randint(20, 40)  # Changement de session
         
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
         self.user_agent = await self.get_user_agent()
+        await self.get_proxy()
         self.client = httpx.AsyncClient(proxy=self.proxy,
                         headers={"User-Agent": self.user_agent},
                         timeout=REQUEST_TIMEOUT,
                         follow_redirects=True,
                     )
         return self.client
-
-    async def client_get_method(self, url: str, headers: dict | None) -> httpx.Response:
-        """
-        Sends a GET request to the specified URL.
-
-        Args:
-            url (str): URL to send the GET request to.
-            headers (dict, optional): HTTP headers.
-
-        Returns:
-            Response: Response from the GET request.
-        """
-        if not self.client:
-            await self.setup_client()
-
-        final_headers = self.client.headers.copy()
-        if headers:
-            final_headers.update(headers)
-
-        response = await self.client.get(url, headers=final_headers)
-        response.raise_for_status()
-        return response
-
-    async def client_post_method(self, url: str, data: dict | None, headers: dict | None) -> httpx.Response:
-        """
-        Sends a POST request to the specified URL.
-
-        Args:
-            url (str): URL to send the POST request to.
-            headers (dict, optional): HTTP headers.
-
-        Returns:
-            Response: Response from the POST request.
-        """
-        if not self.client:
-            await self.setup_client()
-
-        final_headers = self.client.headers.copy()
-        if headers:
-            final_headers.update(headers)
-
-        response = await self.client.post(url, data=data, headers=final_headers)
-        response.raise_for_status()
-        return response
-
-    async def client_retry_request(self):
-        """Method to retry a request if it fails."""
-        pass
     
-    async def close_client(self) -> None:
-        """Close the client properly"""
+    async def _request(
+        self,
+        method: str,
+        url: str,
+        headers: dict | None = None,
+        data=None,
+        max_retries: int = 3,
+        backoff_factor: float = 0.5
+    ) -> httpx.Response | None:
+        if not self.client:
+            await self.setup_client()
+
+        final_headers = self.client.headers.copy()
+        if headers:
+            final_headers.update(headers)
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = await self.client.request(method, url, headers=final_headers, data=data)
+                response.raise_for_status()
+                self.request_count += 1
+                if self.request_count >= self.reset_threshold:
+                    await self._rotate_session()
+                return response
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                if attempt == max_retries:
+                    self.failed_urls.append(url)
+                    return None
+                await asyncio.sleep(backoff_factor * attempt)
+
+    async def _rotate_session(self):
+        """Rotate the HTTP session after a certain number of requests."""
+        logger.info("Rotate http session after %d request", self.request_count)
         if self.client:
             await self.client.aclose()
+        self.request_count = 0
+        self.reset_threshold = random.randint(20, 40)
+        self.user_agent = await self.get_user_agent()
+        self.client = await self.setup_client()
+
+    async def get(self, url: str, headers: dict | None = None) -> httpx.Response | None:
+        return await self._request("GET", url, headers=headers)
+
+    async def post(self, url: str, data=None, headers: dict | None = None) -> httpx.Response | None:
+        return await self._request("POST", url, headers=headers, data=data)
+    
+    async def __aenter__(self):
+        """Initialize the http client when entering the context."""
+        if not self.client:
+            await self.setup_client()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Close the http client when exiting the context."""
+        await self.client.aclose()
 
     async def init_user_agents_list(self) -> ListUserAgent:
         """Returns a user-agents list for header usage.
@@ -112,3 +119,30 @@ class AsyncClientHandler:
             self.user_agent_liste = await self.init_user_agents_list()
         user_agent = self.user_agent_liste.get_user_agent()
         return user_agent
+    
+    async def get_proxy(self) -> str | None:
+        """Returns the proxy used by the client."""
+        if not self.proxy:
+            logger.info("No proxy available.")
+            return None
+
+        try:
+            async with httpx.AsyncClient(proxy=self.proxy, timeout=5.0) as client:
+                response = await client.get("https://httpbin.org/ip")
+                response.raise_for_status()
+                ip = response.json().get("origin")
+                logger.info(f"Proxy avilable, IP : {ip}")
+                self.proxy_ok = True
+                return self.proxy
+        except Exception as e:
+            logger.warning(f"Proxy unvailable or invalid : {e}")
+            self.proxy_ok = False
+            return None
+
+    async def get_failed_urls(self) -> list[str] | None:
+        """Returns the list of failed Urls."""
+        if self.failed_urls:
+            return self.failed_urls
+        else:
+            logger.info("No failes URLS found.")
+            return None
