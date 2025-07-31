@@ -29,13 +29,14 @@ class AsyncClientHandler:
         self.proxy = proxy
         self.user_agent_liste: ListUserAgent | None = None
         self.failed_urls: list[str] = []
+        self.request_count: int = 0
         self.retry_attempts: int = 3
-        self.reset_threshold = random.randint(20, 40)  # Changement de session
+        self.reset_threshold: int = random.randint(20, 40)  # Changement de session
         
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
         self.user_agent = await self.get_user_agent()
-        await self.get_proxy()
+        self.proxy = await self.get_proxy()
         self.client = httpx.AsyncClient(proxy=self.proxy,
                         headers={"User-Agent": self.user_agent},
                         timeout=REQUEST_TIMEOUT,
@@ -66,12 +67,13 @@ class AsyncClientHandler:
                 self.request_count += 1
                 if self.request_count >= self.reset_threshold:
                     await self._rotate_session()
+                await asyncio.sleep(random.uniform(0.8, 2.5))
                 return response
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 if attempt == max_retries:
                     self.failed_urls.append(url)
                     return None
-                await asyncio.sleep(backoff_factor * attempt)
+                await asyncio.sleep(backoff_factor * (2 ** (attempt - 1)))
 
     async def _rotate_session(self):
         """Rotate the HTTP session after a certain number of requests."""
@@ -103,25 +105,30 @@ class AsyncClientHandler:
         """Returns a user-agents list for header usage.
         
         Returns:
-            self.user_agent_liste : a list of user-agents.
+            self.user_agent_liste (ListUserAgent) : a list of user-agents.
         """
         self.user_agent_liste = ListUserAgent()
         await self.user_agent_liste.refresh_user_agents_list()
         return self.user_agent_liste         
 
-    async def get_user_agent(self):
+    async def get_user_agent(self) -> str:
         """Returns a user-agent string for header usage.
         
         Returns:
-            self.user_agent : a scored user-agents.
+            self.user_agent (str) : a scored user-agents.
         """
         if self.user_agent_liste is None:
             self.user_agent_liste = await self.init_user_agents_list()
-        user_agent = self.user_agent_liste.get_user_agent()
-        return user_agent
+        self.user_agent = self.user_agent_liste.get_user_agent()
+        return self.user_agent
     
     async def get_proxy(self) -> str | None:
-        """Returns the proxy used by the client."""
+        """Returns the proxy used by the client.
+        
+        Returns:
+            self.proxy (str | None) : the proxy used by the client.
+            None if no proxy is available or if the proxy is invalid.
+        """
         if not self.proxy:
             logger.info("No proxy available.")
             return None
@@ -139,8 +146,12 @@ class AsyncClientHandler:
             self.proxy_ok = False
             return None
 
-    async def get_failed_urls(self) -> list[str] | None:
-        """Returns the list of failed Urls."""
+    def get_failed_urls(self) -> list[str] | None:
+        """Returns the list of failed Urls.
+        
+        Returns:
+            self.failed_urls (list[str] | None) : a list of failed URLs or None if no failed URLs.
+        """
         if self.failed_urls:
             return self.failed_urls
         else:

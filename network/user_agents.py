@@ -70,7 +70,11 @@ class ListUserAgent:
         self.enabling_update: bool = enabling_update
 
     async def load_user_agents_list(self, user_agents_list: list[str]) -> list[UserAgent]:
-        """Loads and returns the complete ListUserAgents"""
+        """Loads user_agents from a list and returns the complete ListUserAgents with UserAgent objects
+        
+        Returns: 
+            (list[UserAgent]): List of UserAgent objects created from the provided user_agents_list
+        """
         if not isinstance(user_agents_list, list) or not all(isinstance(ua, str) for ua in user_agents_list):
             raise ValueError("User agents list must be a list of strings.")
         self.liste_user_agents: list[UserAgent] = [
@@ -78,8 +82,12 @@ class ListUserAgent:
         ]
         return self.liste_user_agents
         
-    async def refresh_user_agents_list(self):
-        """Refresh the complete ListUserAgents from the latest user-agents list"""
+    async def refresh_user_agents_list(self) -> list[UserAgent]:
+        """Refresh the complete ListUserAgents from the latest user-agents list
+        
+        Returns: 
+            (list[UserAgent]): List of UserAgent objects created from the provided user_agents_list
+        """
         user_agents_list = await self.get_update_user_agents_list()
         return await self.load_user_agents_list(user_agents_list)
 
@@ -89,6 +97,11 @@ class ListUserAgent:
 
         Returns:
             last_update_url (str): String representing the url of the latest up-to-date user-agents list
+            
+        Raises:
+            httpx.HTTPERROR : If there is an error when attempting to reach useragents.io site returns the cached url
+            IndexError : If the sitemap doesn't contain the 'sitemap' tag, returns the cached url
+            AttributeError : If the sitemap doesn't contain the 'loc' tag, returns the cached url
         """
         logger.info("Retrieving the url to the latest updated list of user-agents")
         url_usergantsio: str = "https://useragents.io/sitemaps/useragents.xml"
@@ -127,6 +140,11 @@ class ListUserAgent:
 
         Returns:
             user_agents (list[str]): String representing the url of the latest up-to-date user-agents sitemap
+            
+        Raises:
+            httpx.HTTPError : If there is an error when attempting to reach useragents.io site, retruns the default user-agents list
+            IndexError : If the sitemap doesn't contain the 'sitemap' tag, retruns the default user-agents list
+            AttributeError : If the sitemap doesn't contain the 'loc' tag, retruns the default user-agents list
         """
         logger.info("Retrieves updated user_agents list")
         default_user_agents_list = [
@@ -178,7 +196,17 @@ class ListUserAgent:
             return user_agents_string
 
     async def read_cache_user_agents(self) -> dict[str, list[str]]:
-        """Checks for the presence of the user-agents cache file"""
+        """Checks for the presence of the user-agents cache file
+        
+        Returns:
+            (dict[str, list[str]]): Returns a dictionnary with the url as key and a list of user-agents as value.
+        
+        Raises:
+            OSError: If there is an error when attempting to open the cache file, returns the default user-agents list
+            TypeError: If the cache file is not in the expected format, returns the default user-agents list
+            RuntimeError: If there is an error when attempting to read the cache file, returns the default user-agents list
+            ValueError: If the cache file is not in JSON format, returns the default user-agents list
+        """
         logger.info("Checks for the presence of the user-agents cache file")
         safe_callback: dict[str, list[str]] = {
             "absolute_url_not_found": [
@@ -225,7 +253,7 @@ class ListUserAgent:
         Retrieves the url of the latest user-agents list from our cache
 
         Returns:
-            Optional[str]: Represents the url of the latest user-agents list from the cache
+            (Optional[str]): Represents the url of the latest user-agents list from the cache or a default value
         """
         cache = await self.read_cache_user_agents()
         if cache:
@@ -236,6 +264,9 @@ class ListUserAgent:
     async def compare_url_actualise_url_cache(self) -> bool:
         """
         Compares the updated url from useragents.io with the url present in our JSON cache
+        
+        Returns:
+            (bool): True if the URLs are the same, False otherwise.
         """
         self.actual_url_user_agents = await self.get_updated_url_user_agents()
         cache_url = await self.get_cache_url_user_agents()
@@ -261,7 +292,11 @@ class ListUserAgent:
             )
 
     async def get_update_user_agents_list(self) -> list[str]:
-        """Returns the list of user-agents to update or not"""
+        """Get the list of user-agents to update or not 
+        
+        Returns:
+            (list[str]): List of user-agents to update or not.
+        """
         logger.info(
             "Start retrieving the updated list of user-agents, from the cache if possible."
         )
@@ -281,6 +316,7 @@ class ListUserAgent:
 
         Args:
             user_agent (UserAgent): Object representing a user-agent
+            
         Returns:
             (int): Rating of the user-agent being analyzed
         """
