@@ -42,7 +42,7 @@ class TestUnitAsyncClientHandler:
             handler = AsyncClientHandler()
         with patch("httpx.AsyncClient.__aenter__", return_value=AsyncMock(get=mock_httpx_get)):
             with patch("httpx.AsyncClient.__aexit__", return_value=None):
-                proxy_used = await handler.get_proxy()
+                proxy_used = await handler._get_proxy()
 
         assert proxy_used == "http://testproxy:8080"
         assert handler.proxy_ok is True
@@ -65,7 +65,7 @@ class TestUnitAsyncClientHandler:
             handler = AsyncClientHandler()
         with patch("httpx.AsyncClient.__aenter__", return_value=AsyncMock(get=mock_httpx_get)):
             with patch("httpx.AsyncClient.__aexit__", return_value=None):
-                proxy_used = await handler.get_proxy()
+                proxy_used = await handler._get_proxy()
 
         assert proxy_used == None
         assert handler.proxy_ok is False

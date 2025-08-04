@@ -36,8 +36,8 @@ class AsyncClientHandler:
         
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
-        self.user_agent = await self.get_user_agent()
-        proxy = await self.get_proxy()
+        self.user_agent = await self._get_user_agent()
+        proxy = await self._get_proxy()
         self.client = httpx.AsyncClient(proxy=proxy,
                         headers={"User-Agent": self.user_agent},
                         timeout=REQUEST_TIMEOUT,
@@ -83,7 +83,7 @@ class AsyncClientHandler:
             await self.client.aclose()
         self.request_count = 0
         self.reset_threshold = random.randint(20, 40)
-        self.user_agent = await self.get_user_agent()
+        self.user_agent = await self._get_user_agent()
         self.client = await self.setup_client()
 
     async def get(self, url: str, headers: dict | None = None) -> httpx.Response | None:
@@ -102,7 +102,7 @@ class AsyncClientHandler:
         """Close the http client when exiting the context."""
         await self.client.aclose()
 
-    async def init_user_agents_list(self) -> ListUserAgent:
+    async def _init_user_agents_list(self) -> ListUserAgent:
         """Returns a user-agents list for header usage.
         
         Returns:
@@ -112,18 +112,18 @@ class AsyncClientHandler:
         await self.user_agent_liste.refresh_user_agents_list()
         return self.user_agent_liste         
 
-    async def get_user_agent(self) -> str:
+    async def _get_user_agent(self) -> str:
         """Returns a user-agent string for header usage.
         
         Returns:
             self.user_agent (str) : a scored user-agents.
         """
         if self.user_agent_liste is None:
-            self.user_agent_liste = await self.init_user_agents_list()
+            self.user_agent_liste = await self._init_user_agents_list()
         self.user_agent = self.user_agent_liste.get_user_agent()
         return self.user_agent
     
-    async def get_proxy(self) -> str | None:
+    async def _get_proxy(self) -> str | None:
         """Returns the proxy used by the client.
         
         Returns:
