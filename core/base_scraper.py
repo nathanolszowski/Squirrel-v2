@@ -20,12 +20,14 @@ class BaseScraper(ABC):
         self.navigator
         
     async def run(self):
-        pass
+        await self.init_client()
+        data = await self.get_data()
+        return data
     
     @abstractmethod
     async def get_data(self):
         pass
     
     @abstractmethod
-    async def init_client(self):
+    async def init_client(self) -> None:
         pass

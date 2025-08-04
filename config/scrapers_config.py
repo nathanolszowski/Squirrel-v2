@@ -19,6 +19,7 @@ class URLType(str, Enum):
 
 
 class ScraperConf(TypedDict):
+    scraper_name:str
     enabled: bool
     scraper_type: ScraperType
     url_strategy: URLType
@@ -27,6 +28,7 @@ class ScraperConf(TypedDict):
 
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     "BNP": {
+        "scraper_name": "BNP",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.XML,
@@ -38,30 +40,35 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
         },
     },
     "JLL": {
+        "scraper_name": "JLL",
         "enabled": False,
         "scraper_type": ScraperType.PW,
         "url_strategy": URLType.XML,
         "start_link": "https://immobilier.jll.fr/sitemap-properties.xml",
     },
     "CBRE": {
+        "scraper_name": "CBRE",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.XML,
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
     },
     "ALEXBOLTON": {
+        "scraper_name": "ALEXBOLTON",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.XML,
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
     },
     "CUSHMAN": {
+        "scraper_name": "CUSHMAN",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.XML,
         "start_link": "https://immobilier.cushmanwakefield.fr/sitemap.xml",
     },
     "KNIGHTFRANK": {
+        "scraper_name": "KNIGHTFRANK",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.URL,
@@ -71,12 +78,14 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
         },
     },
     "ARTHURLOYD": {
+        "scraper_name": "ARTHURLOYD",
         "enabled": True,
         "scraper_type": ScraperType.HTTP,
         "url_strategy": URLType.XML,
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",
     },
     "SAVILLS": {
+        "scraper_name": "SAVILLS",
         "enabled": True,
         "scraper_type": ScraperType.API,
         "url_strategy": URLType.API,
