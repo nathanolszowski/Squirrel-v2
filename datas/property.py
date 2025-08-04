@@ -21,8 +21,8 @@ class Property:
     postal_code:str
     contact:str
     resume:str
-    aminties:str
+    amenities:str
     url_image:str
     latitude:float
     longitude:float
-    price:float
+    price:str 

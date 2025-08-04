@@ -14,7 +14,11 @@ class ListingExporter:
         """Initializes the listing exporter."""
         self.exported_listings = data
         
-    def export_to_json(self, path:str):
+    def export_to_json(self, path:str, fileobj=None):
         from dataclasses import asdict
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump([asdict(prop) for prop in self.exported_listings.properties], f, ensure_ascii=False, indent=2)
+        data = [asdict(prop) for prop in self.exported_listings.properties]
+        if fileobj is None:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        else:
+            json.dump(data, fileobj, ensure_ascii=False, indent=2)
