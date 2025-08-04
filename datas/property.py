@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Property dataclass
+Property dataclass to represent a property with its details.
+This module defines the Property dataclass which includes various attributes related to a property such as agency, Url,...
 """
 
 from dataclasses import dataclass
