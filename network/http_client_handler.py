@@ -19,14 +19,14 @@ class AsyncClientHandler:
     Class to handle HTTP requests.
     """
 
-    def __init__(self, proxy: str | None = None):
+    def __init__(self):
         """
         Initializes the ClientHandler with a specific HTTP client.
 
         Args:
             http_client: An instance of an HTTP client that implements methods like `get` and `post`.
         """
-        self.proxy = proxy
+        self.proxy: str | None = PROXY if PROXY else None
         self.proxy_ok: bool = False
         self.user_agent_liste: ListUserAgent | None = None
         self.failed_urls: list[str] = []
