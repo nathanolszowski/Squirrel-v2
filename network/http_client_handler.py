@@ -72,7 +72,6 @@ class AsyncClientHandler:
                 return response
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 if attempt == max_retries:
-                    self.failed_urls.append(url)
                     return None
                 await asyncio.sleep(backoff_factor * (2 ** (attempt - 1)))
 
@@ -145,16 +144,4 @@ class AsyncClientHandler:
         except Exception as e:
             logger.warning(f"Proxy unvailable or invalid : {e}")
             self.proxy_ok = False
-            return None
-
-    def get_failed_urls(self) -> list[str] | None:
-        """Returns the list of failed Urls.
-        
-        Returns:
-            self.failed_urls (list[str] | None) : a list of failed URLs or None if no failed URLs.
-        """
-        if self.failed_urls:
-            return self.failed_urls
-        else:
-            logger.info("No failes URLS found.")
             return None

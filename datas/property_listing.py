@@ -13,6 +13,7 @@ class PropertyListing:
         """Initializes an empty property listing."""
         self.name_agency_listing = name_agency_listing
         self.properties:list[Property] = []
+        self.failed_urls:list[str] | None = []
         
     def create_property(self, **kwargs) -> Property:
         """Creates a new property and adds it to the listing.

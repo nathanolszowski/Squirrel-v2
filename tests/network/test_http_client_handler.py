@@ -13,7 +13,7 @@ class TestUnitAsyncClientHandler:
     """Test class for unitesting AsyncClientHandler class"""
     
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler.get_user_agent", return_value="TestUA/1.0")
+    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
     async def test_setup_client_with_headers(self, mock_get_user_agent):
         handler = AsyncClientHandler()
 
@@ -26,7 +26,7 @@ class TestUnitAsyncClientHandler:
             assert kwargs["headers"]["User-Agent"] == "TestUA/1.0"
     
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler.get_user_agent", return_value="TestUA/1.0")
+    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
     @patch("httpx.AsyncClient.get")
     async def test_get_proxy_success(
         self,
@@ -48,7 +48,7 @@ class TestUnitAsyncClientHandler:
         assert handler.proxy_ok is True
         
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler.get_user_agent", return_value="TestUA/1.0")
+    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
     @patch("httpx.AsyncClient.get")
     async def test_get_proxy_failure(
         self,
@@ -71,7 +71,7 @@ class TestUnitAsyncClientHandler:
         assert handler.proxy_ok is False
         
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler.get_user_agent", return_value="NewTestUA/1.0")
+    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="NewTestUA/1.0")
     @patch("network.http_client_handler.AsyncClientHandler.setup_client")
     async def test_client_rotate_session(self, mock_setup_client, mock_get_user_agent):
         """Test the session rotation after a certain number of requests."""
@@ -119,7 +119,7 @@ class TestUnitAsyncClientHandler:
             )
         ]
     )
-    @patch("network.http_client_handler.AsyncClientHandler.get_user_agent", return_value="TestUA/1.0")
+    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
     @patch("network.http_client_handler.AsyncClientHandler.setup_client")
     async def test_request_parametrized(
         self,
@@ -146,7 +146,5 @@ class TestUnitAsyncClientHandler:
         if expected_status:
             assert isinstance(response, httpx.Response)
             assert response.status_code == expected_status
-            assert url not in handler.failed_urls
         else:
             assert response is None
-            assert url in handler.failed_urls
