@@ -8,5 +8,5 @@ from base_scraper import BaseScraper
 class APIScraper(BaseScraper):
     pass
 
-class VanillaScraper(APIScraper):
+class VanillaAPI(APIScraper):
     pass

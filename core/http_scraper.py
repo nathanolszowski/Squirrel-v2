@@ -8,7 +8,7 @@ from base_scraper import BaseScraper
 class HTTPScraper(BaseScraper):
     pass
 
-class VanillaScraper(HTTPScraper):
+class VanillaHTTP(HTTPScraper):
     pass
 
 class PlaywrightScraper(HTTPScraper):

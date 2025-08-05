@@ -23,10 +23,10 @@ class BaseScraper(ABC):
         Args:
             config (ScraperConf): Represents a configuration for a scraper with its details
         """
-        self.scraper_name = config.get("name")
+        self.scraper_name = config.get("scraper_name")
         self.enabled = config.get("enabled")
         self.crawler_strategy = config.get("scraper_type")
-        self.base_url = config.get("startlink")
+        self.start_link = config.get("start_link")
         self.url_strategy = config.get("url_strategy")
         self.client: Optional[AsyncClientHandler] = None
     
@@ -38,19 +38,25 @@ class BaseScraper(ABC):
     async def get_data(self):
         pass
     
-    @abstractmethod
-    async def init_client(self):
-        pass
+    async def init_client(self) -> None:
+        self.client = AsyncClientHandler()
+        await self.client.setup_client()
     
-    async def url_discovery_strategy(self) -> list[str]:
+    async def url_discovery_strategy(self) -> list[str]|None:
+        """This method is used to collect the Urls to be scraped.
+        It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
+
+        Returns:
+            list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
+        """
         if self.client is not None:
             logger.info("Fetch urls from xml sitemap")
             failed_urls = []
             try:
                 urls = []
-                if isinstance(self.base_url, dict):
+                if isinstance(self.start_link, dict):
                     logger.info("Fetching urls from multiple sitemaps")
-                    for actif, url in self.base_url.items():
+                    for actif, url in self.start_link.items():
                         async with self.client as client:
                             response = await client.get(url)
                         if response is None:
@@ -65,10 +71,10 @@ class BaseScraper(ABC):
                 else:
                     logger.info("Fetching urls from a single sitemap")
                     async with self.client as client:
-                        response = await client.get(self.base_url)
+                        response = await client.get(self.start_link)
                         if response is None:
-                            logger.warning(f"No response from : {self.base_url}")
-                            failed_urls.append(self.base_url)
+                            logger.warning(f"No response from : {self.start_link}")
+                            failed_urls.append(self.start_link)
                         else:
                             page = HTMLParser(response.text)
                             for node in page.css("url"):
@@ -81,7 +87,7 @@ class BaseScraper(ABC):
 
             except Exception as e:
                 logger.error(
-                    f"Error when fetching urls from {self.base_url}: {e}"
+                    f"Error when fetching urls for {self.scraper_name}: {e}"
                 )
                 return []
         
