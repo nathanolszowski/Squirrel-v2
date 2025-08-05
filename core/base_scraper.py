@@ -9,8 +9,8 @@ from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
 from network.http_client_handler import AsyncClientHandler
 import logging
+from selectolax.parser import HTMLParser
 from typing import Optional
-from core.url_discovery_strategy import URLDiscoveryStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +42,48 @@ class BaseScraper(ABC):
     async def init_client(self):
         pass
     
-    async def init_url_strategy(self) -> list[str]:
-        strategy = URLDiscoveryStrategy(self.url_strategy)
-        urls = await strategy.discover_urls(self.url_strategy, self.client)
-        logger.info(
-            f"[{self.scraper_name}] Trouvé {len(urls)} URLs dans le sitemap XML"
-        )
-        return urls
+    async def url_discovery_strategy(self) -> list[str]:
+        if self.client is not None:
+            logger.info("Fetch urls from xml sitemap")
+            failed_urls = []
+            try:
+                urls = []
+                if isinstance(self.base_url, dict):
+                    logger.info("Fetching urls from multiple sitemaps")
+                    for actif, url in self.base_url.items():
+                        async with self.client as client:
+                            response = await client.get(url)
+                        if response is None:
+                            logger.warning(f"No response from : {url}")
+                            failed_urls.append(url)
+                            continue
+                        page = HTMLParser(response.text)
+                        for node in page.css("url"):
+                            loc_node = node.css_first("loc")
+                            if loc_node:
+                                urls.append(loc_node.text())
+                else:
+                    logger.info("Fetching urls from a single sitemap")
+                    async with self.client as client:
+                        response = await client.get(self.base_url)
+                        if response is None:
+                            logger.warning(f"No response from : {self.base_url}")
+                            failed_urls.append(self.base_url)
+                        else:
+                            page = HTMLParser(response.text)
+                            for node in page.css("url"):
+                                loc_node = node.css_first("loc")
+                                if loc_node:
+                                    urls.append(loc_node.text())
+                if failed_urls:
+                    logger.warning(f"Sitemaps failed to load: {failed_urls}")
+                return urls
+
+            except Exception as e:
+                logger.error(
+                    f"Error when fetching urls from {self.base_url}: {e}"
+                )
+                return []
+        
+        
     
