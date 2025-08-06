@@ -15,13 +15,12 @@ class PropertyListing:
         self.properties:list[Property] = []
         self.failed_urls:list[str] | None = []
         
-    def create_property(self, **kwargs) -> Property:
+    def create_property(self, property:Property) -> Property:
         """Creates a new property and adds it to the listing.
         
         Returns:
             property (Property): The created property instance.
         """
-        property = Property(**kwargs)
         self.properties.append(property)
         return property
     

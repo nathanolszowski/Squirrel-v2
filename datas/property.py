@@ -5,24 +5,25 @@ This module defines the Property dataclass which includes various attributes rel
 """
 
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class Property:
     """Represents a property with its details."""
-    agency:str
-    url:str
-    reference:str
-    contract:str
-    active:str
-    disponibility:str
-    area:str
-    division:str
-    adress:str
-    postal_code:str
-    contact:str
-    resume:str
-    amenities:str
-    url_image:str
-    latitude:float
-    longitude:float
-    price:str 
+    agency:Optional[str]
+    url:Optional[str]
+    reference:Optional[str]
+    contract:Optional[str]
+    active:Optional[str]
+    disponibility:Optional[str]
+    area:Optional[str]
+    division:Optional[str]
+    adress:Optional[str]
+    postal_code:Optional[str]
+    contact:Optional[str]
+    resume:Optional[str]
+    amenities:Optional[str]
+    url_image:Optional[str]
+    latitude:Optional[float]
+    longitude:Optional[float]
+    price:Optional[str]

@@ -7,7 +7,9 @@ This module provides a base class for scrapers, defining the common interface an
 from abc import ABC, abstractmethod
 from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
+from datas.property import Property
 from network.http_client_handler import AsyncClientHandler
+from config.scrapers_selectors import SelectorFields
 import logging
 from selectolax.parser import HTMLParser
 from typing import Optional
@@ -17,25 +19,28 @@ logger = logging.getLogger(__name__)
 class BaseScraper(ABC):
     """Base class for all scrapers."""
     
-    def __init__(self, config:ScraperConf):
+    def __init__(self, config:ScraperConf, selectors:SelectorFields):
         """Initialize a basic scraper from the configuration
 
         Args:
             config (ScraperConf): Represents a configuration for a scraper with its details
         """
+        self.url_nb:None|int = None # used to limit the number of URLs to scrape 
         self.scraper_name = config.get("scraper_name")
         self.enabled = config.get("enabled")
         self.crawler_strategy = config.get("scraper_type")
         self.start_link = config.get("start_link")
         self.url_strategy = config.get("url_strategy")
         self.client: Optional[AsyncClientHandler] = None
+        self.selectors:SelectorFields = selectors
+        self.listing:PropertyListing = PropertyListing(self.scraper_name)
     
     @abstractmethod
-    async def run(self):
+    async def run(self) -> None:
         pass
     
     @abstractmethod
-    async def get_data(self):
+    async def get_data(self, url: str) -> Property|None:
         pass
     
     async def init_client(self) -> None:
