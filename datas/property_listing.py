@@ -13,16 +13,15 @@ class PropertyListing:
         """Initializes an empty property listing."""
         self.name_agency_listing = name_agency_listing
         self.properties:list[Property] = []
-        self.failed_urls:list[str] | None = []
+        self.failed_urls:list = []
         
-    def create_property(self, property:Property) -> Property:
+    def add_property(self, property:Property) -> None:
         """Creates a new property and adds it to the listing.
         
         Returns:
             property (Property): The created property instance.
         """
         self.properties.append(property)
-        return property
     
     def count_properties(self) -> int:
         """Returns the number of properties in the listing.

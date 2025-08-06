@@ -68,15 +68,17 @@ class VanillaHTTP(HTTPScraper):
             for url in urls:
                 prop = await self.get_data(url)
                 if prop is not None:
-                    self.listing.create_property(prop)
+                    self.listing.add_property(prop)
                 else:
+                    self.listing.failed_urls.append(url)
                     continue
         else:
             for url in urls[:self.url_nb]:
                 prop = await self.get_data(url)
                 if prop is not None:
-                    self.listing.create_property(prop)
+                    self.listing.add_property(prop)
                 else:
+                    self.listing.failed_urls.append(url)
                     continue
         # vérifier si self.listing is not None et compléter les failed requests
 
@@ -102,7 +104,7 @@ class VanillaHTTP(HTTPScraper):
                     area=self.safe_select_text(page, self.selectors.get("area")),
                     division=(
                         self.safe_select_text(page, self.selectors.get("division"))
-                        if self.selectors.get("division", "None") != "None"
+                        if self.selectors.get("division", None) is not None
                         else "Non divisible"
                     ),
                     adress=self.safe_select_text(page, self.selectors.get("adress")),
