@@ -134,7 +134,7 @@ class AsyncClientHandler:
             return None
 
         try:
-            async with httpx.AsyncClient(proxy=self.proxy, timeout=5.0) as client:
+            async with httpx.AsyncClient(proxy=self.proxy, follow_redirects=True, timeout=5.0) as client:
                 response = await client.get("https://httpbin.org/ip")
                 response.raise_for_status()
                 ip = response.json().get("origin")

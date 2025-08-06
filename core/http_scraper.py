@@ -19,9 +19,11 @@ class HTTPScraper(BaseScraper):
         super().__init__(config, selectors)
         
     async def run(self) -> None:
+        """Launch the scraper, discover url and scrape all the urls"""
         pass
       
     async def get_data(self, url:str) -> Property|None:
+        """Collect data from an HTML page"""
         pass
     
     def data_hook(self) -> None:
@@ -76,41 +78,47 @@ class VanillaHTTP(HTTPScraper):
                     self.listing.create_property(prop)
                 else:
                     continue
+        # vérifier si self.listing is not None et compléter les failed requests
 
     async def get_data(self, url:str) -> Property|None:
-        try:
-            async with self.client as client:
-                response = await self.client.get(url)
-        except Exception as e:
-            logger.error(f"[{self.scraper_name}] Enable to fetch {url} to get datas: {e}")
-        else:
-            page = HTMLParser(response.text)
-            property = Property(
-                agency=self.scraper_name,
-                url=url,
-                reference=self.safe_select_text(page, self.selectors.get("reference")),
-                contract=self.safe_select_text(page, self.selectors.get("contract")),
-                active=self.safe_select_text(page, self.selectors.get("active")),
-                disponibility=self.safe_select_text(page, self.selectors.get("disponibility")),
-                area=self.safe_select_text(page, self.selectors.get("area")),
-                division=(
-                    self.safe_select_text(page, self.selectors.get("division"))
-                    if self.selectors.get("division", "None") != "None"
-                    else "Non divisible"
-                ),
-                adress=self.safe_select_text(page, self.selectors.get("adress")),
-                postal_code=self.safe_select_text(page, self.selectors.get("postal_code", None)),
-                contact=self.safe_select_text(page, self.selectors.get("contact")),
-                resume=self.safe_select_text(page, self.selectors.get("resume")),
-                amenities=self.safe_select_text(page, self.selectors.get("amenities")),
-                url_image=self.safe_select_text(page, self.selectors.get("url_image")),
-                latitude=self.safe_select_text(page, self.selectors.get("latitude")),
-                longitude=self.safe_select_text(page, self.selectors.get("longitude")),
-                price=self.safe_select_text(page, self.selectors.get("global_price")),
-            )
-            return property
+        """Collect data from an HTML page"""
+        if self.client is not None:
+            try:
+                async with self.client as client:
+                    response = await client.get(url)
+            except Exception as e:
+                logger.error(f"[{self.scraper_name}] Enable to fetch {url} to get datas: {e}")
+            else:
+                if response is None:
+                    return None
+                page = HTMLParser(response.text)
+                property = Property(
+                    agency=self.scraper_name,
+                    url=url,
+                    reference=self.safe_select_text(page, self.selectors.get("reference")),
+                    contract=self.safe_select_text(page, self.selectors.get("contract")),
+                    active=self.safe_select_text(page, self.selectors.get("active")),
+                    disponibility=self.safe_select_text(page, self.selectors.get("disponibility")),
+                    area=self.safe_select_text(page, self.selectors.get("area")),
+                    division=(
+                        self.safe_select_text(page, self.selectors.get("division"))
+                        if self.selectors.get("division", "None") != "None"
+                        else "Non divisible"
+                    ),
+                    adress=self.safe_select_text(page, self.selectors.get("adress")),
+                    postal_code=self.safe_select_text(page, self.selectors.get("postal_code", None)),
+                    contact=self.safe_select_text(page, self.selectors.get("contact")),
+                    resume=self.safe_select_text(page, self.selectors.get("resume")),
+                    amenities=self.safe_select_text(page, self.selectors.get("amenities")),
+                    url_image=self.safe_select_text(page, self.selectors.get("url_image")),
+                    latitude=self.safe_select_text(page, self.selectors.get("latitude")),
+                    longitude=self.safe_select_text(page, self.selectors.get("longitude")),
+                    price=self.safe_select_text(page, self.selectors.get("global_price")),
+                )
+                return property
     
-    def data_hook(self):
+    def data_hook(self) -> None:
+        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
 
 class PlaywrightScraper(HTTPScraper):

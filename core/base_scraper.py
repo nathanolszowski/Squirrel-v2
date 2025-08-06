@@ -37,13 +37,16 @@ class BaseScraper(ABC):
     
     @abstractmethod
     async def run(self) -> None:
+        """Launch the scraper, discover url and scrape all the urls"""
         pass
     
     @abstractmethod
     async def get_data(self, url: str) -> Property|None:
+        """Collect data from an HTML page"""
         pass
     
     async def init_client(self) -> None:
+        """Initialize the http client for the actual scraper"""
         self.client = AsyncClientHandler()
         await self.client.setup_client()
     
