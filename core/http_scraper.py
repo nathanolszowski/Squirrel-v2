@@ -29,27 +29,6 @@ class HTTPScraper(BaseScraper):
     def data_hook(self) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
-
-    def safe_select_text(self, tree:HTMLParser, selector:str|None) -> Any:
-        """
-        Extract text from an HTML element securely from a Selectolax tree.
-
-        Args:
-            tree (HTMLParser): HTML tree parsed by selectolax
-            selector (str): CSS selector from settings.py
-        Returns:
-            (str): Selector text value else None
-        """
-        if selector is None:
-            return None
-        try:
-            node = tree.css_first(selector)
-            return node.text(strip=True) if node else None
-        except Exception as e:
-            logger.error(
-                f"[{self.scraper_name}] Error with the following css selector='{selector}': {e}"
-            )
-            return None
   
 class VanillaHTTP(HTTPScraper):
     
@@ -58,7 +37,7 @@ class VanillaHTTP(HTTPScraper):
         
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
-        logger.info(f"[{self.scraper_name}] is starting to scrape datas")
+        logger.info(f"[{self.scraper_name}] is starting to scrape data")
         await self.init_client()
         urls = await self.url_discovery_strategy()
         if not urls:
@@ -80,7 +59,7 @@ class VanillaHTTP(HTTPScraper):
                 else:
                     self.listing.failed_urls.append(url)
                     continue
-        # vérifier si self.listing is not None et compléter les failed requests
+        logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties}")
 
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
@@ -89,7 +68,7 @@ class VanillaHTTP(HTTPScraper):
                 async with self.client as client:
                     response = await client.get(url)
             except Exception as e:
-                logger.error(f"[{self.scraper_name}] Enable to fetch {url} to get datas: {e}")
+                logger.error(f"[{self.scraper_name}] Enable to fetch {url} to get data: {e}")
             else:
                 if response is None:
                     return None
@@ -122,6 +101,42 @@ class VanillaHTTP(HTTPScraper):
     def data_hook(self) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
+    
+    def safe_select_text(self, tree:HTMLParser, selector:str|None) -> Any:
+        """
+        Extract text from an HTML element securely from a Selectolax tree.
+
+        Args:
+            tree (HTMLParser): HTML tree parsed by selectolax
+            selector (str): CSS selector from settings.py
+        Returns:
+            (str): Selector text value else None
+        """
+        if selector is None:
+            return None
+        try:
+            node = tree.css_first(selector)
+            return node.text(strip=True) if node else None
+        except Exception as e:
+            logger.error(
+                f"[{self.scraper_name}] Error with the following css selector='{selector}': {e}"
+            )
+            return None
 
 class PlaywrightScraper(HTTPScraper):
-    pass
+
+    def __init__(self, config: ScraperConf, selectors:SelectorFields):
+        super().__init__(config, selectors)
+        
+    async def run(self) -> None:
+        """Launch the scraper, discover url and scrape all the urls"""
+        # mode browser default + browser camoufox
+        pass
+    
+    async def get_data(self, url:str) -> Property|None:
+        """Collect data from an HTML page"""
+        pass
+    
+    def data_hook(self) -> None:
+        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
+        pass
