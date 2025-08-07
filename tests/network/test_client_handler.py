@@ -4,18 +4,18 @@ Testing module for http client handling
 """
 
 import pytest
-from network.http_client_handler import AsyncClientHandler
+from network.client_handler import HTTPClientHandler
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import Response
 import httpx
 
 class TestUnitAsyncClientHandler:
-    """Test class for unitesting AsyncClientHandler class"""
+    """Test class for unitesting HTTPClientHandler class"""
     
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
+    @patch("network.client_handler.HTTPClientHandler._get_user_agent", return_value="TestUA/1.0")
     async def test_setup_client_with_headers(self, mock_get_user_agent):
-        handler = AsyncClientHandler()
+        handler = HTTPClientHandler()
 
         with patch("httpx.AsyncClient") as mock_client:
             await handler.setup_client()
@@ -26,7 +26,7 @@ class TestUnitAsyncClientHandler:
             assert kwargs["headers"]["User-Agent"] == "TestUA/1.0"
     
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
+    @patch("network.client_handler.HTTPClientHandler._get_user_agent", return_value="TestUA/1.0")
     @patch("httpx.AsyncClient.get")
     async def test_get_proxy_success(
         self,
@@ -38,8 +38,8 @@ class TestUnitAsyncClientHandler:
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = {"origin": "1.2.3.4"}
         mock_httpx_get.return_value = mock_response
-        with patch("network.http_client_handler.PROXY", "http://testproxy:8080"):
-            handler = AsyncClientHandler()
+        with patch("network.client_handler.PROXY", "http://testproxy:8080"):
+            handler = HTTPClientHandler()
         with patch("httpx.AsyncClient.__aenter__", return_value=AsyncMock(get=mock_httpx_get)):
             with patch("httpx.AsyncClient.__aexit__", return_value=None):
                 proxy_used = await handler._get_proxy()
@@ -48,7 +48,7 @@ class TestUnitAsyncClientHandler:
         assert handler.proxy_ok is True
         
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
+    @patch("network.client_handler.HTTPClientHandler._get_user_agent", return_value="TestUA/1.0")
     @patch("httpx.AsyncClient.get")
     async def test_get_proxy_failure(
         self,
@@ -61,8 +61,8 @@ class TestUnitAsyncClientHandler:
         mock_response.json.return_value = {"origin": "1.2.3.4"}
         mock_httpx_get.return_value = mock_response
         
-        with patch("network.http_client_handler.PROXY", "http://testproxy:8080"):
-            handler = AsyncClientHandler()
+        with patch("network.client_handler.PROXY", "http://testproxy:8080"):
+            handler = HTTPClientHandler()
         with patch("httpx.AsyncClient.__aenter__", return_value=AsyncMock(get=mock_httpx_get)):
             with patch("httpx.AsyncClient.__aexit__", return_value=None):
                 proxy_used = await handler._get_proxy()
@@ -71,12 +71,12 @@ class TestUnitAsyncClientHandler:
         assert handler.proxy_ok is False
         
     @pytest.mark.asyncio
-    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="NewTestUA/1.0")
-    @patch("network.http_client_handler.AsyncClientHandler.setup_client")
+    @patch("network.client_handler.HTTPClientHandler._get_user_agent", return_value="NewTestUA/1.0")
+    @patch("network.client_handler.HTTPClientHandler.setup_client")
     async def test_client_rotate_session(self, mock_setup_client, mock_get_user_agent):
         """Test the session rotation after a certain number of requests."""
         
-        handler = AsyncClientHandler()
+        handler = HTTPClientHandler()
         old_client = AsyncMock()
         handler.client = old_client
         handler.user_agent = "OldUA"
@@ -119,8 +119,8 @@ class TestUnitAsyncClientHandler:
             )
         ]
     )
-    @patch("network.http_client_handler.AsyncClientHandler._get_user_agent", return_value="TestUA/1.0")
-    @patch("network.http_client_handler.AsyncClientHandler.setup_client")
+    @patch("network.client_handler.HTTPClientHandler._get_user_agent", return_value="TestUA/1.0")
+    @patch("network.client_handler.HTTPClientHandler.setup_client")
     async def test_request_parametrized(
         self,
         mock_setup_client,
@@ -132,7 +132,7 @@ class TestUnitAsyncClientHandler:
     ):
         """Test the _request method with success and fail."""
         
-        handler = AsyncClientHandler()
+        handler = HTTPClientHandler()
         handler.client = AsyncMock()
         handler.client.request.side_effect = side_effects
 

@@ -7,10 +7,11 @@ Script global variables settings
 PROXY = ""
 
 # Timeouts
-REQUEST_TIMEOUT = 10  # seconds
+HTTP_TIMEOUT = 10  # seconds
 PLAYWRIGHT_WAIT_TIME = 15  # seconds
 
 # Playwright configuration
+CAMOUFOX = False
 
 # Updating user_agents list or not
 USER_AGENT_UPDATE = False
