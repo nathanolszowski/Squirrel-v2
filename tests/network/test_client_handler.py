@@ -4,12 +4,13 @@ Testing module for http client handling
 """
 
 import pytest
-from network.client_handler import HTTPClientHandler
+from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import Response
 import httpx
 
-class TestUnitAsyncClientHandler:
+
+class TestHTTPClientHandler:
     """Test class for unitesting HTTPClientHandler class"""
     
     @pytest.mark.asyncio
@@ -148,3 +149,83 @@ class TestUnitAsyncClientHandler:
             assert response.status_code == expected_status
         else:
             assert response is None
+            
+class TestHeadlessClientHandler:
+    """Test class for unitesting HeadlessClient class"""
+    
+    @pytest.mark.asyncio
+    @patch('network.client_handler.async_playwright')
+    @patch('network.client_handler.AsyncCamoufox')
+    async def test_setup_client_camoufox_success(self, mock_camoufox_class, mock_playwright_class):
+        """Test Camoufox OK."""
+        handler = HeadlessClientHandler()
+        handler._get_user_agent = AsyncMock(return_value='agent-test')
+        handler._get_proxy = AsyncMock(return_value='proxy-test')
+        handler.camoufox = True
+
+        mock_browser = AsyncMock(name="MockCamoufoxBrowser")
+        mock_camoufox = AsyncMock()
+        mock_camoufox.__aenter__.return_value = mock_browser
+        mock_camoufox_class.return_value = mock_camoufox
+
+        await handler.setup_client()
+        assert handler.browser == mock_browser
+        assert handler.context is None
+
+    @pytest.mark.asyncio
+    @patch('network.client_handler.async_playwright')
+    @patch('network.client_handler.AsyncCamoufox', side_effect=Exception("Erreur Camoufox"))
+    async def test_setup_client_camoufox_fail_fallback_chromium(self, mock_camoufox_class, mock_playwright_class):
+        """Test fallback Chromium si Camoufox KO."""
+        handler = HeadlessClientHandler()
+        handler._get_user_agent = AsyncMock(return_value='agent-test')
+        handler._get_proxy = AsyncMock(return_value='proxy-test')
+        handler.camoufox = True
+
+        # Mock Playwright + browser/context
+        mock_playwright = AsyncMock()
+        mock_browser = AsyncMock(name="MockBrowserChromium")
+        mock_context = AsyncMock(name="MockContextChromium")
+        mock_playwright.start.return_value = mock_playwright
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright_class.return_value = mock_playwright
+
+        await handler.setup_client()
+        assert handler.browser == mock_browser
+        assert handler.context == mock_context
+
+    @pytest.mark.asyncio
+    @patch('network.client_handler.async_playwright')
+    async def test_setup_client_chromium_default(self, mock_playwright_class):
+        """Test Chromium lancé directement (camoufox désactivé)."""
+        handler = HeadlessClientHandler()
+        handler._get_user_agent = AsyncMock(return_value='default-agent')
+        handler._get_proxy = AsyncMock(return_value=None)
+        handler.camoufox = False
+
+        # Mock Playwright + browser/context
+        mock_playwright = AsyncMock()
+        mock_browser = AsyncMock(name="MockBrowserChromium")
+        mock_context = AsyncMock(name="MockContextChromium")
+        mock_playwright.start.return_value = mock_playwright
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_browser.new_context.return_value = mock_context
+        mock_playwright_class.return_value = mock_playwright
+
+        await handler.setup_client()
+        assert handler.browser == mock_browser
+        assert handler.context == mock_context
+
+    @pytest.mark.asyncio
+    async def test_goto_real_url_chromium(self):
+        url = "https://example.com"
+
+        async with HeadlessClientHandler(headless=True) as handler:
+            handler.camoufox = False  # Force Chromium natif
+            handler._get_user_agent = AsyncMock(return_value="MonUserAgentTest/1.0")
+            await handler.setup_client()
+            html = await handler.goto(url, wait_until="domcontentloaded")
+
+            assert "<html" in html.lower()
+            assert "example" in html.lower()

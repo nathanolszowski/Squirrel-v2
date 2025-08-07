@@ -193,25 +193,87 @@ class HeadlessClientHandler(AsyncClientHandler):
     def __init__(self, headless:bool = True) -> None:
         """Initializes the Client with a specific headless browser."""
         super().__init__()
-        self.browser: Browser | None = None
+        self.browser: Any = None
         self.playwright = None
         self.headless = headless
         self.context = None
         self.camoufox = CAMOUFOX
                
     async def setup_client(self):
-        """This method choose if the client used the default browser or a special scraping browser named Camoufox"""
+        """This method choose if the client used the default browser or a special scraping browser named Camoufox."""
         self.user_agent = await self._get_user_agent()
         proxy = await self._get_proxy()
         if self.camoufox:
-            logger.info("Lancement du navigateur Camoufox.")
-            self.browser = await AsyncCamoufox(headless=self.headless).__aenter__()
-            self.context = None  # Camoufox ne distingue pas browser/contexte
+            try:
+                await self._launch_camoufox_browser(proxy)
+            except Exception as e:
+                logger.warning(f"Enabling to use Camoufox : {e} Use default browser.")
+                await self._launch_default_browser(proxy)
         else:
-            logger.info("Lancement du navigateur Chromium Playwright.")
-            self.playwright = await async_playwright().start()
-            browser_args: dict[str, Any] = {"headless": self.headless}
-            if proxy:
-                browser_args["proxy"] = {"server": proxy}
-            self.browser = await self.playwright.chromium.launch(**browser_args)
-            self.context = await self.browser.new_context(user_agent=user_agent)
+            await self._launch_default_browser(proxy)
+            
+    async def _launch_camoufox_browser(self, proxy):
+        """Start client with Camoufox browser."""
+        logger.info("Starting client with Camoufox browser")
+        self.browser = await AsyncCamoufox(
+            headless=self.headless,
+            proxy={'server': proxy}
+        ).__aenter__()
+        self.context = None
+
+    async def _launch_default_browser(self, proxy):
+        """Start client with default chromium browser."""
+        logger.info("Starting client with default Chromium browser")
+        self.playwright = await async_playwright().start()
+        browser_args:dict|Any = {"headless": self.headless}
+        if proxy:
+            browser_args["proxy"] = {"server": proxy}
+        self.browser = await self.playwright.chromium.launch(**browser_args)
+        self.context = await self.browser.new_context(user_agent=self.user_agent)
+            
+    async def __aenter__(self):
+        """Initialize the http client when entering the context."""
+        if not self.browser:
+            await self.setup_client()
+        return self
+    
+    async def _close_client(self, exc_type=None, exc=None, tb=None):
+        """Close the browser and the client"""
+        if hasattr(self, "context") and self.context is not None:
+            await self.context.close()
+            self.context = None
+
+        if hasattr(self, "browser") and self.browser is not None:
+            await self.browser.close()
+            self.browser = None
+
+        if hasattr(self, "playwright") and self.playwright is not None:
+            await self.playwright.stop()
+            self.playwright = None
+        
+        logger.info("Browser and Playwright are closed.")
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """Finally close the client"""
+        await self._close_client(exc_type, exc, tb)
+        
+    async def goto(self, url: str, **kwargs) -> str:
+        """Open an html page with camoufox and default browser"""
+        if self.context is not None: # default mode
+            page = await self.context.new_page()
+        elif self.browser is not None: # camoufox mode
+            page = await self.browser.new_page()
+        else:
+            raise RuntimeError(
+                "No browser or context, setup a client first."
+            )
+
+        logger.info(f"Go to : {url}")
+        try:
+            await page.goto(url, **kwargs)
+            html = await page.content()
+            logger.info(f"Page loaded : {url}")
+            return html
+        finally:
+            await page.close()
+            logger.info("Page closed")
