@@ -32,6 +32,7 @@ class BaseScraper(ABC):
         self.start_link = config.get("start_link")
         self.url_strategy = config.get("url_strategy")
         self.client:Optional[HTTPClientHandler] = None
+        self.browser:Optional[HeadlessClientHandler] = None
         self.selectors:SelectorFields = selectors
         self.listing:PropertyListing = PropertyListing(self.scraper_name)
     
