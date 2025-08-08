@@ -27,6 +27,10 @@ class HTTPScraper(BaseScraper):
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
         pass
+    
+    def instance_url_filter(self, url:str):
+        """Overwrite to add a url filter at the instance level"""
+        pass
       
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
@@ -72,6 +76,10 @@ class VanillaHTTP(HTTPScraper):
                     continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties}")
 
+    def instance_url_filter(self, url:str):
+        """Overwrite to add a url filter at the instance level"""
+        pass
+    
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
         if self.client is not None:
@@ -172,6 +180,10 @@ class PlaywrightScraper(HTTPScraper):
                     self.listing.failed_urls.append(url)
                     continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties}")
+        
+    def instance_url_filter(self, url:str):
+        """Overwrite to add a url filter at the instance level"""
+        pass
     
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an Playwright Page

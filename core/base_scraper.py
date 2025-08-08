@@ -51,6 +51,23 @@ class BaseScraper(ABC):
         """Initialize the http client for the actual scraper"""
         pass
     
+    @abstractmethod
+    def instance_url_filter(self, url:str):
+        """Overwrite to add a url filter at the instance level"""
+        pass
+
+    @classmethod
+    def global_url_filter(cls, url:str) -> bool:
+        """Add a url filter at the class level"""
+        return False
+
+    def _filter_url(self, url:str) -> bool:
+        """Retourne True si l'URL passe tous les filtres."""
+        if self.instance_url_filter(url) or BaseScraper.global_url_filter(url):
+            return False
+        else:
+            return True    
+
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.
         It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
@@ -75,7 +92,7 @@ class BaseScraper(ABC):
                         page = HTMLParser(response.text)
                         for node in page.css("url"):
                             loc_node = node.css_first("loc")
-                            if loc_node:
+                            if loc_node and self._filter_url(loc_node.text()):
                                 urls.append(loc_node.text())
                 else:
                     logger.info("Fetching urls from a single sitemap")
@@ -88,7 +105,7 @@ class BaseScraper(ABC):
                             page = HTMLParser(response.text)
                             for node in page.css("url"):
                                 loc_node = node.css_first("loc")
-                                if loc_node:
+                                if loc_node and self._filter_url(loc_node.text()):
                                     urls.append(loc_node.text())
                 if failed_urls:
                     logger.warning(f"Sitemaps failed to load: {failed_urls}")
