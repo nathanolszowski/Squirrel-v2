@@ -193,11 +193,12 @@ class HeadlessClientHandler(AsyncClientHandler):
     def __init__(self, headless:bool = True) -> None:
         """Initializes the Client with a specific headless browser."""
         super().__init__()
-        self.browser: Any = None
-        self.playwright = None
+        self.browser:Any = None
+        self.playwright:Any = None
         self.headless = headless
         self.context = None
         self.camoufox = CAMOUFOX
+        self._camoufox_ctx:Any = None
                
     async def setup_client(self):
         """This method choose if the client used the default browser or a special scraping browser named Camoufox."""
@@ -215,10 +216,11 @@ class HeadlessClientHandler(AsyncClientHandler):
     async def _launch_camoufox_browser(self, proxy):
         """Start client with Camoufox browser."""
         logger.info("Starting client with Camoufox browser")
-        self.browser = await AsyncCamoufox(
+        self._camoufox_ctx = AsyncCamoufox(
             headless=self.headless,
-            proxy={'server': proxy}
-        ).__aenter__()
+            proxy={"server": proxy} if proxy else None,
+        )
+        self.browser = await self._camoufox_ctx.__aenter__()
         self.context = None
 
     async def _launch_default_browser(self, proxy):
@@ -237,20 +239,26 @@ class HeadlessClientHandler(AsyncClientHandler):
             await self.setup_client()
         return self
     
-    async def _close_client(self, exc_type=None, exc=None, tb=None):
-        """Close the browser and the client"""
-        if hasattr(self, "context") and self.context is not None:
+    async def _close_client(self, exc_type=None, exc=None, tb=None) -> None:
+        if self.context is not None:
             await self.context.close()
             self.context = None
 
-        if hasattr(self, "browser") and self.browser is not None:
-            await self.browser.close()
-            self.browser = None
+        if self.browser is not None:
+            if self._camoufox_ctx is not None:
+                try:
+                    await self._camoufox_ctx.__aexit__(exc_type, exc, tb)
+                finally:
+                    self._camoufox_ctx = None
+                    self.browser = None
+            else:
+                await self.browser.close()
+                self.browser = None
 
-        if hasattr(self, "playwright") and self.playwright is not None:
+        if self.playwright is not None:
             await self.playwright.stop()
             self.playwright = None
-        
+        await asyncio.sleep(0)
         logger.info("Browser and Playwright are closed.")
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -267,7 +275,6 @@ class HeadlessClientHandler(AsyncClientHandler):
             raise RuntimeError(
                 "No browser or context, setup a client first."
             )
-
         logger.info(f"Go to : {url}")
         try:
             await page.goto(url, **kwargs)
