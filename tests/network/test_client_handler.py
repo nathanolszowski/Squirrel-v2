@@ -239,17 +239,3 @@ class TestHeadlessClientHandler:
         mock_context.close.assert_awaited()
         mock_browser.close.assert_awaited()
         mock_playwright.stop.assert_awaited()
-    """
-    @pytest.mark.asyncio
-    async def test_goto_real_url_chromium(self):
-        url = "https://example.com"
-
-        async with HeadlessClientHandler(headless=True) as handler:
-            handler.camoufox = False
-            handler._get_user_agent = AsyncMock(return_value="MonUserAgentTest/1.0")
-            await handler.setup_client()
-            html = await handler.goto(url, wait_until="domcontentloaded")
-            
-        assert "<html" in html.lower()
-        assert "example" in html.lower()
-    """

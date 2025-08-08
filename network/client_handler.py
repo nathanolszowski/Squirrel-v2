@@ -223,7 +223,7 @@ class HeadlessClientHandler(AsyncClientHandler):
         self.browser = await self._camoufox_ctx.__aenter__()
         self.context = None
 
-    async def _launch_default_browser(self, proxy):
+    async def _launch_default_browser(self, proxy) -> None:
         """Start client with default chromium browser."""
         logger.info("Starting client with default Chromium browser")
         self.playwright = await async_playwright().start()
@@ -240,6 +240,7 @@ class HeadlessClientHandler(AsyncClientHandler):
         return self
     
     async def _close_client(self, exc_type=None, exc=None, tb=None) -> None:
+        """Close the client properly no matter which default or camoufox browser is used"""
         if self.context is not None:
             await self.context.close()
             self.context = None
@@ -261,26 +262,6 @@ class HeadlessClientHandler(AsyncClientHandler):
         await asyncio.sleep(0)
         logger.info("Browser and Playwright are closed.")
 
-    async def __aexit__(self, exc_type, exc, tb):
+    async def __aexit__(self, exc_type, exc, tb) -> None:
         """Finally close the client"""
         await self._close_client(exc_type, exc, tb)
-        
-    async def goto(self, url: str, **kwargs) -> str:
-        """Open an html page with camoufox and default browser"""
-        if self.context is not None: # default mode
-            page = await self.context.new_page()
-        elif self.browser is not None: # camoufox mode
-            page = await self.browser.new_page()
-        else:
-            raise RuntimeError(
-                "No browser or context, setup a client first."
-            )
-        logger.info(f"Go to : {url}")
-        try:
-            await page.goto(url, **kwargs)
-            html = await page.content()
-            logger.info(f"Page loaded : {url}")
-            return html
-        finally:
-            await page.close()
-            logger.info("Page closed")

@@ -8,6 +8,7 @@ import logging
 from selectolax.parser import HTMLParser
 from typing import Any
 from datas.property import Property
+from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
 
@@ -17,6 +18,10 @@ class HTTPScraper(BaseScraper):
     
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
+        
+    async def init_client(self) -> None:
+        """Initialize the http client for the actual scraper"""
+        pass
         
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
@@ -34,6 +39,11 @@ class VanillaHTTP(HTTPScraper):
     
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
+        
+    async def init_client(self) -> None:
+        """Initialize the http client for the actual scraper"""
+        self.client = HTTPClientHandler()
+        await self.client.setup_client()
         
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""

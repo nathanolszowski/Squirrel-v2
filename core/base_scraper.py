@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
 from datas.property import Property
-from network.http_client_handler import HTTPClientHandler
+from network.client_handler import HeadlessClientHandler, HTTPClientHandler
 from config.scrapers_selectors import SelectorFields
 import logging
 from selectolax.parser import HTMLParser
@@ -31,7 +31,7 @@ class BaseScraper(ABC):
         self.crawler_strategy = config.get("scraper_type")
         self.start_link = config.get("start_link")
         self.url_strategy = config.get("url_strategy")
-        self.client: Optional[HTTPClientHandler] = None
+        self.client:Optional[HTTPClientHandler] = None
         self.selectors:SelectorFields = selectors
         self.listing:PropertyListing = PropertyListing(self.scraper_name)
     
@@ -45,10 +45,10 @@ class BaseScraper(ABC):
         """Collect data from an HTML page"""
         pass
     
+    @abstractmethod
     async def init_client(self) -> None:
         """Initialize the http client for the actual scraper"""
-        self.client = HTTPClientHandler()
-        await self.client.setup_client()
+        pass
     
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.
