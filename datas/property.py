@@ -13,6 +13,7 @@ class Property:
     agency:Optional[str]
     url:Optional[str]
     reference:Optional[str]
+    asset_type:Optional[str]
     contract:Optional[str]
     active:Optional[str]
     disponibility:Optional[str]

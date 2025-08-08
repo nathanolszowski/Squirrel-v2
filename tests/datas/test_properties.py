@@ -18,6 +18,7 @@ def property_fixture():
         agency="ImmoTest",
         url="https://test.com/annonce/1",
         reference="REF123",
+        asset_type="office",
         contract="Vente",
         active="Oui",
         disponibility="Immédiate",

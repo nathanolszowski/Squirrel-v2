@@ -9,6 +9,7 @@ from typing import Optional, Dict, TypedDict
 
 class SelectorFields(TypedDict, total=False):
     reference:Optional[str]
+    asset_type:Optional[str]
     contract:Optional[str]
     active:Optional[str]
     disponibility:Optional[str]
@@ -31,6 +32,7 @@ class SelectorFields(TypedDict, total=False):
 SELECTORS: Dict[str, SelectorFields] = {
     "BNP": {
         "reference": "#presentation > div > div.col.s12.offer-hero--left > div.offer-hero--left--middle > div.line.space-between.share-businessid-line.hidden-mobile.hidden-tablet > div.line.mobile-column > div.business-id > p",
+        "asset_type": None,
         "contract": None,
         "active": None,
         "disponibility": "#columns-container > div:nth-child(1) > ul > li > p > span",
@@ -49,6 +51,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "JLL": {
         "reference": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.flex.items-center.justify-between.gap-4.max-\\[575px\\]\\:flex-col-reverse > div.flex.items-center.justify-center.gap-4.max-\\[575px\\]\\:flex-col-reverse > span",
+        "asset_type": None,
         "contract": None,
         "active": None,
         "disponibility": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.mt-4.flex.items-start.sm\\:mt-9 > div.flex-1.\\[\\&\\:not\\(\\:last-child\\)\\]\\:mr-11 > ul > li:nth-child(2) > span.text-lg.text-neutral-700",
@@ -62,6 +65,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "CBRE": {
         "reference": None,
+        "asset_type": None,
         "contract": None,
         "active": None,
         "disponibility": "#contentHolder_availability",
@@ -79,6 +83,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "ALEXBOLTON": {
         "reference": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.bolton-header-5.bolton-grey.mb-2",
+        "asset_type": None,
         "contract": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.d-flex.gap-4.mb-4 > div:nth-child(1) > p:nth-child(1)",
         "active": None,
         "disponibility": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.d-flex.gap-4.mb-4 > div:nth-child(2) > p:nth-child(2)",
@@ -96,6 +101,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "CUSHMANWAKEFIELD": {
         "reference": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.u-t.u-t--sm.u-t-additional",
+        "asset_type": None,
         "contract": None,
         "active": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
         "contract": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
@@ -114,6 +120,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "KNIGHTFRANK": {
         "reference": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div:nth-child(1) > div > ol > li:nth-child(5) > a > span",
+        "asset_type": None,
         "contract": None,
         "active": None,
         "disponibility": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div.row.pb-4.align-items-center.p24 > div.col-xl-4.col-md-4.col-12.cDisp > div > p",
@@ -130,6 +137,7 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "ARTHURLOYD": {
         "reference": "#advisor-brick-wrapper > div > div:nth-child(1) > div.offer-informations.d-flex.align-items-center.justify-content-between > div.reference > b",
+        "asset_type": None,
         "contract": None,
         "active": None,
         "disponibility": None,
@@ -150,6 +158,7 @@ SELECTORS: Dict[str, SelectorFields] = {
 """ Add a css selectors dict for a new scraper
 "SCRAPER" : {
     "reference": None,
+    "asset_type": None,
     "contract": None,
     "actif": None,
     "disponibility": None,
