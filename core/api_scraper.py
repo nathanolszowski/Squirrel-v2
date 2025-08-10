@@ -34,12 +34,6 @@ class APIScraper(BaseScraper):
         """Overwrite to add a url filter at the instance level"""
         pass
 
-    def setup_header(self):
-        header = {
-            "origin": self.base_url,
-            "user-agent": self.ua_generateur.get(),
-            }
-
 class VanillaAPI(APIScraper):
 
     def __init__(self, config, selectors, base_url, base_url_property, api_url):

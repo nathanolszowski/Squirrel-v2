@@ -11,7 +11,7 @@ import logging
 import random
 import asyncio
 from typing import Any
-from playwright.async_api import async_playwright, Browser
+from playwright.async_api import async_playwright
 from camoufox.async_api import AsyncCamoufox
 from config.squirrel_settings import HTTP_TIMEOUT, PROXY, CAMOUFOX
 
