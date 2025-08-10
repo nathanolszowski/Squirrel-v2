@@ -11,7 +11,6 @@ class SelectorFields(TypedDict, total=False):
     reference:Optional[str]
     asset_type:Optional[str]
     contract:Optional[str]
-    active:Optional[str]
     disponibility:Optional[str]
     area:Optional[str]
     division:Optional[str]
@@ -34,7 +33,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": "#presentation > div > div.col.s12.offer-hero--left > div.offer-hero--left--middle > div.line.space-between.share-businessid-line.hidden-mobile.hidden-tablet > div.line.mobile-column > div.business-id > p",
         "asset_type": None,
         "contract": None,
-        "active": None,
         "disponibility": "#columns-container > div:nth-child(1) > ul > li > p > span",
         "area": "#presentation > div > div.col.s12.offer-hero--left > div.offer-hero--left--middle > div.surface-block.line.no-padding.flex-column > div.surface > p > span:nth-child(1)",
         "division": "#presentation > div > div.col.s12.offer-hero--left > div.offer-hero--left--middle > div.surface-block.line.no-padding.flex-column > div.surface > p > span.divisible",
@@ -53,7 +51,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.flex.items-center.justify-between.gap-4.max-\\[575px\\]\\:flex-col-reverse > div.flex.items-center.justify-center.gap-4.max-\\[575px\\]\\:flex-col-reverse > span",
         "asset_type": None,
         "contract": None,
-        "active": None,
         "disponibility": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.mt-4.flex.items-start.sm\\:mt-9 > div.flex-1.\\[\\&\\:not\\(\\:last-child\\)\\]\\:mr-11 > ul > li:nth-child(2) > span.text-lg.text-neutral-700",
         "area": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.mt-4.flex.items-start.sm\\:mt-9 > div.flex-1.\\[\\&\\:not\\(\\:last-child\\)\\]\\:mr-11 > ul > li:nth-child(1) > span.text-lg.text-neutral-700 > span > span:nth-child(1)",
         "division": "#propertySummary > div > div.col-span-12.lg\\:col-span-10 > div > div.mt-4.flex.items-start.sm\\:mt-9 > div.flex-1.\\[\\&\\:not\\(\\:last-child\\)\\]\\:mr-11 > ul > li:nth-child(1) > span.text-lg.text-neutral-700 > span > span:nth-child(1) > span",
@@ -67,7 +64,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": None,
         "asset_type": None,
         "contract": None,
-        "active": None,
         "disponibility": "#contentHolder_availability",
         "area": "#contentHolder_surface",
         "division": "#contentHolder_surfaceDiv",
@@ -85,7 +81,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.bolton-header-5.bolton-grey.mb-2",
         "asset_type": None,
         "contract": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.d-flex.gap-4.mb-4 > div:nth-child(1) > p:nth-child(1)",
-        "active": None,
         "disponibility": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.d-flex.gap-4.mb-4 > div:nth-child(2) > p:nth-child(2)",
         "area": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > div.d-flex.gap-4.mb-4 > div:nth-child(1) > p:nth-child(4)",
         "division": None,
@@ -101,9 +96,8 @@ SELECTORS: Dict[str, SelectorFields] = {
     },
     "CUSHMANWAKEFIELD": {
         "reference": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.u-t.u-t--sm.u-t-additional",
-        "asset_type": None,
+        "asset_type": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
         "contract": None,
-        "active": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
         "contract": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
         "disponibility": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(3) > p:nth-child(3) > span.u-t--tertiary",
         "area": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(3) > p:nth-child(1) > span.u-t--tertiary",
@@ -122,7 +116,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div:nth-child(1) > div > ol > li:nth-child(5) > a > span",
         "asset_type": None,
         "contract": None,
-        "active": None,
         "disponibility": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div.row.pb-4.align-items-center.p24 > div.col-xl-4.col-md-4.col-12.cDisp > div > p",
         "area": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div.row.pb-4.align-items-center.p24 > div.col-xl-4.col-md-4.col-auto.pe-0 > div > p.valeur-offre",
         "division": "body > main > section > div.container.p-lg-0.contOMob > div > div.col-xl-7.p-xl-0.p-0 > div.row.pb-4.align-items-center.p24 > div.col-xl-4.col-md-4.col-auto.pe-0 > div > p.post-text-offre > span",
@@ -139,7 +132,6 @@ SELECTORS: Dict[str, SelectorFields] = {
         "reference": "#advisor-brick-wrapper > div > div:nth-child(1) > div.offer-informations.d-flex.align-items-center.justify-content-between > div.reference > b",
         "asset_type": None,
         "contract": None,
-        "active": None,
         "disponibility": None,
         "area": "#details-desktop > div > div.col-xl-2.d-none.d-xl-block.text-end > div > div > a > div.max-surface > span",
         "division": "#details-desktop > div > div.col-xl-2.d-none.d-xl-block.text-end > div > div > a > div.d-flex.justify-content-end.min-surface > div:nth-child(1) > span.surface",
@@ -160,7 +152,6 @@ SELECTORS: Dict[str, SelectorFields] = {
     "reference": None,
     "asset_type": None,
     "contract": None,
-    "actif": None,
     "disponibility": None,
     "area": None,
     "division": None,

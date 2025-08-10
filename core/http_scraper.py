@@ -5,13 +5,11 @@ HTTP Scraper module.
 
 from base_scraper import BaseScraper
 import logging
-from selectolax.parser import HTMLParser
 from typing import Any
 from datas.property import Property
 from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
-from playwright.async_api import Page
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +96,6 @@ class VanillaHTTP(HTTPScraper):
                     reference=self.safe_select_text(page, self.selectors.get("reference")),
                     asset_type=self.safe_select_text(page, self.selectors.get("asset_type")),
                     contract=self.safe_select_text(page, self.selectors.get("contract")),
-                    active=self.safe_select_text(page, self.selectors.get("active")),
                     disponibility=self.safe_select_text(page, self.selectors.get("disponibility")),
                     area=self.safe_select_text(page, self.selectors.get("area")),
                     division=(
@@ -220,7 +217,6 @@ class PlaywrightScraper(HTTPScraper):
                     reference=await self.safe_select_text(page, self.selectors.get("reference")),
                     asset_type=await self.safe_select_text(page, self.selectors.get("asset_type")),
                     contract=await self.safe_select_text(page, self.selectors.get("contract")),
-                    active=await self.safe_select_text(page, self.selectors.get("active")),
                     disponibility=await self.safe_select_text(page, self.selectors.get("disponibility")),
                     area=await self.safe_select_text(page, self.selectors.get("area")),
                     division=(
