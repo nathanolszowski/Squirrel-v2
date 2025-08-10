@@ -3,6 +3,7 @@
 This project is a collection of scrapers to extract real estate ad data from different Agency sites.
 It allows you to have a complete market view for offices in Île-de-France, business premises and warehouses in France.
 List of available agency sites:
+
 - CBRE
 - BNP
 - JLL /!/ Disabled /!/
@@ -15,54 +16,58 @@ List of available agency sites:
 ## Project status
 
 1. Priority 1 :
-- Improve the recovery of longitude/latitude and addresses for all agencies
-- Homogenize collected datas
-- Manage duplicate :
+- [] Work on code factorization and scraping speed
+- [] Progress bar
+- [] Improve the recovery of longitude/latitude and addresses for all agencies
+- [] Homogenize data collection
+- [] Manage duplicates :
    - compare lat/long, adresse, accroche, titre et surface totale
 
 2. Priority 2 :
-- Cache system to avoid re-scraping the same pages too often?
-- Identification of too large number of None values
+- [] Cache system to avoid re-scraping the same pages too often?
+- [] Identification of too large number of None values
 
 3. Priority 3 :
-- Work on code factorization and scraping speed
-- Addition of market sectors
-- Compare the new export with the old one
-- Progress bar
-- Setting up retry mechanisms for failed requests
-- Asynchronous scraping
-- Tests
+- [] Addition of market sectors
+- [] Compare the new export with the old one
+- [] Natural language processing for resume and amenities (with IA if possible)
+
 
 
 ## Project structure
 
 ```
-Squirrel/
+Squirrel-v2/
 ├── config/
 │   ├── scrapers_config.py      # Configuration for scrapers
 │   └── scrapers_selectors.py     # CSS selectors by scraper
 │   └── squirrel_settings.py     # Global configuration
 ├── core/
-│   ├── api_scraper.py           # Class for api scraper
+│   ├── api_scraper.py           # Class for api scrapers
 │   ├── base_scraper.py          # Base class for all scrapers
-│   ├── http_scraper.py          # Class for http scraper
-│   ├── scraper_factory.py        # Factory for create a new scraper
-│   └── url_discovery_strategy.py  # Stratégie de découverte d'url
-├── scrapers/
+│   ├── http_scraper.py          # Class for http scrapers
+├── scrapers/                 # Scraper for each sites
 │   ├── bnp.py
 │   ├── jll.py
 │   └── ...
-├── data/
+├── datas/
+│   ├── listing_exporter.py      # Class for listing exporter
+│   ├── listing_manager.py       # Class for listings manager
+│   ├── property_listing.py      # Class for properties manager
+│   └── property.py              # Dataclass for http scrapers
 ├── exports/
 ├── logs/
 ├── network/
-│   └── http_client_handler     # Http client handler for web scraping requests
+│   ├── client_handler.py     # Client handler for web scraping requests
 │   └── user_agent.py         # User-agents generator
 ├── tests/
+│   └── datas/
+│       └── test_properties.py
 │   └── network/
-│       └── test_user_agents
+│       ├──test_client_handler.py
+│       └── test_user_agents.py
 ├── utils/
-│   └── logging_config        # Initialisation du logger (create a log file in logs/ folder)
+│   └── logging.py        # Initialisation du logger (create a log file in logs/ folder)
 └── main.py             # Entry point
 ```
 
@@ -83,7 +88,7 @@ pip install -r requirements.txt
 3. Add your proxy adress :
 `main.py`
 ```
-    PROXY = "YOUR PROXY ADRESS"
+PROXY = "YOUR PROXY ADRESS"
 ```
 
 ## Usage
@@ -99,19 +104,20 @@ JSON Format :
    "confrere": "BNP",
    "url": "https://bnppre.fr/a-vendre/local-activite/seine-et-marne-77/croissy-beaubourg-77183/vente-local-activite-1110-m2-non-divisible-OVACT2423977.html",
    "reference": "Référence : OVACT2423977",
-   "contrat": "Vente",
-   "actif": "Locaux d'activité",
-   "disponibilite": "Immédiate",
-   "surface": "1 111 m²",
-   "division": "N/A",
-   "adresse": "N/A 77183 Croissy-Beaubourg",
+   "contract": "Vente",
+   "asset_type": "Locaux d'activité",
+   "disponibility": "Immédiate",
+   "area": "1 111 m²",
+   "division": "Non divisible",
+   "adress": "N/A 77183 Croissy-Beaubourg",
+   "postal_code": None
    "contact": "Baptiste Quilgars",
-   "accroche": "BNP PARIBAS REAL ESTATE vous propose, à la Vente, une cellule d'activité avec bureaux d'accompagnement, en bon état, disponible à Croissy-Beaubourg.",
-   "amenagements": "L'essentiel à retenirDisponibilité :ImmédiateCharge au sol Rdc :2,00 tonne(s)/m²Porte d'accès plain-pied :3HauteursHauteur sous poutre :5,00 mètre(s)Accès véhiculesAccessibilité type véhicules :Tous porteursEquipementsCharge au sol Rdc :2,00 tonne(s)/m²Climatisation :Réversible dans la partie BureauxEclairage Bureaux :Luminaires encastrésEclairage naturel :SkydomesFaux plafond :OuiFenêtres :OuiPorte d'accès plain-pied :3Sol bureaux :ParquetSols du bâtiment :BétonSource chauffage :Electrique 2 AérothermesType / Etat du bâtimentEtat de l'immeuble :Etat d'usagePrestations de serviceParking :35 PlacesSécurité :Contrôle d'accès - PortailAménagementsAménagement des bureaux :CloisonnésLocaux sociaux :SanitairesSanitaires :Oui",
+   "resume": "BNP PARIBAS REAL ESTATE vous propose, à la Vente, une cellule d'activité avec bureaux d'accompagnement, en bon état, disponible à Croissy-Beaubourg.",
+   "amenities": "L'essentiel à retenirDisponibilité :ImmédiateCharge au sol Rdc :2,00 tonne(s)/m²Porte d'accès plain-pied :3HauteursHauteur sous poutre :5,00 mètre(s)Accès véhiculesAccessibilité type véhicules :Tous porteursEquipementsCharge au sol Rdc :2,00 tonne(s)/m²Climatisation :Réversible dans la partie BureauxEclairage Bureaux :Luminaires encastrésEclairage naturel :SkydomesFaux plafond :OuiFenêtres :OuiPorte d'accès plain-pied :3Sol bureaux :ParquetSols du bâtiment :BétonSource chauffage :Electrique 2 AérothermesType / Etat du bâtimentEtat de l'immeuble :Etat d'usagePrestations de serviceParking :35 PlacesSécurité :Contrôle d'accès - PortailAménagementsAménagement des bureaux :CloisonnésLocaux sociaux :SanitairesSanitaires :Oui",
    "url_image": "https://www.bnppre.fr/sites/default/files/styles/max_2600x2600/public/offers/34/34fcc0a002c3245f1c2cd2c393d1e2b89a1e5582.jpg.webp?itok=tGm22I-P",
    "latitude": 44.8019097,
    "longitude": -0.6488505,
-   "prix_global": "1 700 000 €"
+   "global_price": "1 700 000 €"
 }
 ```
 
@@ -127,12 +133,12 @@ JSON Format :
 
 ## Add a new scraper
 
-1. Créer un nouveau fichier dans le dossier `scrapers/`
-2. Hériter de `BaseScraper`
-3. Implémenter la méthode `post_traitement_hook()` si besoin spécifique du scraper
-4. Ajouter les sélecteurs dans `config/scrapers_selectors.py`
-5. Ajouter le sitemap dans `config/scrapers_config.py`
-6. Instancier le scraper dans `main.py`
+1. Create a new file in `scrapers/`
+2. Inherits from `BaseScraper`
+3. Implement `post_traitement_hook()` and `instance_filter_url()` method if needed
+4. Add selectors in `config/scrapers_selectors.py`
+5. Feel the config for the scraper at `config/scrapers_config.py`
+6. Instance the scraper in `main.py`
 
 ## Maintain
 
@@ -144,13 +150,13 @@ JSON Format :
 ## Error handling
 
 - [Errno 11001] getaddrinfo failed
-└──> Traduit l'argument host/port en une séquence de 5 tuples contenant tous les arguments nécessaires à la création d'une socket connectée à ce service. host est un nom de domaine, une représentation sous forme de chaîne d'une adresse IPv4/v6 ou None.
+└──> Translates the host/port argument into a sequence of 5 tuples containing all the arguments necessary to create a socket connected to this service. host is a domain name, a string representation of an IPv4/v6 address, or None.
 - [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)
 └──> TLS support version ?
 - peer closed connection without sending complete message body (incomplete chunked read)
-└──> Limite imposé par le serveur interrogé.
-   └──> Rien n'a faire du côté client. Possiblement espacer les requêtes.
+└──> Limited by the server
+   └──> Nothing to do client side. Maybe delayed requests
 - Server disconnected without sending a response
-└──> erreur dû aux timeouts ou à la "keep-alive connection" (soit côté client, soit côté serveur)
-   └──> Voir paramétrage httpx.Limits.
+└──> timeouts errors or "keep-alive connection" (client or sever side)
+   └──> See httpx.Limits parameters
 
