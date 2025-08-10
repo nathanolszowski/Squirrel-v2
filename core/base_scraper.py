@@ -59,14 +59,14 @@ class BaseScraper(ABC):
     @classmethod
     def global_url_filter(cls, url:str) -> bool:
         """Add a url filter at the class level"""
-        return False
+        return True
 
     def _filter_url(self, url:str) -> bool:
         """Retourne True si l'URL passe tous les filtres."""
-        if self.instance_url_filter(url) or BaseScraper.global_url_filter(url):
-            return False
+        if self.instance_url_filter(url) and BaseScraper.global_url_filter(url):
+            return True
         else:
-            return True    
+            return False    
 
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.

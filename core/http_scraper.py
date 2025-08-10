@@ -7,6 +7,7 @@ from base_scraper import BaseScraper
 import logging
 from typing import Any
 from datas.property import Property
+from selectolax.parser import HTMLParser
 from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
@@ -113,10 +114,17 @@ class VanillaHTTP(HTTPScraper):
                     longitude=self.safe_select_text(page, self.selectors.get("longitude")),
                     price=self.safe_select_text(page, self.selectors.get("global_price")),
                 )
+                self.data_hook(property, page, url)
                 return property
     
-    def data_hook(self) -> None:
-        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
+    def data_hook(self, data: dict[str], page: HTMLParser, url: str) -> None:
+        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
+
+        Args:
+            data (dict[str]): Représente les données de l'offre à scraper
+            soup (BeautifulSoup): Représente le parser lié à la page html de l'offre à scraper
+            url (str): Représente l'url de l'offre à scraper
+        """
         pass
     
     def safe_select_text(self, tree:HTMLParser, selector:str|None) -> Any:
