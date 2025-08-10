@@ -7,11 +7,11 @@ This module provides a base class for scrapers, defining the common interface an
 from abc import ABC, abstractmethod
 from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
+from selectolax.parser import HTMLParser
 from datas.property import Property
 from network.client_handler import HeadlessClientHandler, HTTPClientHandler
 from config.scrapers_selectors import SelectorFields
 import logging
-from selectolax.parser import HTMLParser
 from typing import Optional
 
 logger = logging.getLogger(__name__)
