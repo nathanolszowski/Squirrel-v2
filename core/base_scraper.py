@@ -63,10 +63,7 @@ class BaseScraper(ABC):
 
     def _filter_url(self, url:str) -> bool:
         """Retourne True si l'URL passe tous les filtres."""
-        if self.instance_url_filter(url) and BaseScraper.global_url_filter(url):
-            return True
-        else:
-            return False    
+        return self.instance_url_filter(url) and BaseScraper.global_url_filter(url)
 
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.

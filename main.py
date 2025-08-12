@@ -7,8 +7,9 @@ from utils.logging import setup_logging
 from scrapers.CBRE import CBREScraper
 from datas.listing_exporter import ListingExporter
 import logging
+import asyncio
 
-def main():
+async def main():
     """Fonction principale"""
 
     # Logging configuration
@@ -22,7 +23,7 @@ def main():
     for scraper in scrapers:
         try:
             logger.info(f"Starting scraping for {scraper.scraper_name} ...")
-            scraper.run()
+            await scraper.run()
             exporter = ListingExporter()
             logger.info(f"Scraping results {scraper.listing.count_properties()}")
             exporter.export_to_json(scraper.listing)
@@ -34,4 +35,4 @@ def main():
     )
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

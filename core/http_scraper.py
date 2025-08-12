@@ -3,7 +3,7 @@
 HTTP Scraper module.
 """
 
-from base_scraper import BaseScraper
+from core.base_scraper import BaseScraper
 import logging
 from typing import Any
 from datas.property import Property
@@ -11,6 +11,7 @@ from selectolax.parser import HTMLParser
 from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
+from playwright.sync_api import Page
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ class VanillaHTTP(HTTPScraper):
                 self.data_hook(property, page, url)
                 return property
     
-    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
+    def data_hook(self, property:Property, page:HTMLParser, url:str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
@@ -150,7 +151,7 @@ class VanillaHTTP(HTTPScraper):
 
 class PlaywrightScraper(HTTPScraper):
 
-    def __init__(self, config: ScraperConf, selectors:SelectorFields):
+    def __init__(self, config:ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
         
     async def init_client(self) -> None:
@@ -244,7 +245,7 @@ class PlaywrightScraper(HTTPScraper):
                 )
                 return property
 
-    async def safe_select_text(self, page: Page, selector: str | None) -> str | None:
+    async def safe_select_text(self, page:Page, selector: str | None) -> str | None:
         """Extract text from an HTML element securely with Playwright.
 
         Args:

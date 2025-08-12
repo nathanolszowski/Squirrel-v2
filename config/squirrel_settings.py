@@ -4,7 +4,7 @@ Script global variables settings
 """
 
 # Proxy URL
-PROXY = ""
+PROXY = "http://zfqxbelefdh8k61-country-fr:vkfspx2ez8cjy7c@rp.scrapegw.com:6060"
 
 # Timeouts
 HTTP_TIMEOUT = 10  # seconds

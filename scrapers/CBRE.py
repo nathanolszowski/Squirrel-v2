@@ -22,25 +22,27 @@ class CBREScraper(VanillaHTTP):
 
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        logger.info("URL filter for cbre")
         pattern = re.compile(
-            r"https://immobilier.cbre.fr/offre/(a-louer|a-vendre)/(bureaux|coworking)/(\d+)"
+            r"https://immobilier\.cbre\.fr/offre/(a-louer|a-vendre)/(bureaux|coworking)/(\d+)"
         )
-        if url.startswith(
-            "https://immobilier.cbre.fr/offre/"
-        ):  # On filtre les offres bureaux dont l'url commence par cette string
-            if "bureaux" in url:
-                match = pattern.match(url)
-                if match and match.group(2)[:2] in DEPARTMENTS_IDF:
+
+        if not url.startswith("https://immobilier.cbre.fr/offre/"):
+            logger.info(f"[{url}] Url non conforme au préfixe attendu")
+            return False
+
+        if "bureaux" in url:
+            match = pattern.match(url)
+            if match:
+                department_code = match.group(3)[:2]
+                if department_code in DEPARTMENTS_IDF:
+                    logger.info(f"[{url}] Url à scraper (département IDF : {department_code})")
                     return True
+                else:
+                    return False
             else:
-                logger.info(
-                    f"[{url}] Url not to be scraped"
-                )
+                logger.info(f"[{url}] Ne correspond pas au pattern attendu")
                 return False
-        logger.info(
-            f"[{url}] Url to be scraped"
-        )
+        return False
 
     def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass

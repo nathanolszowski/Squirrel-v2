@@ -2,14 +2,14 @@
 """
 Scrapers configuration
 """
-from typing import Union, Dict, TypedDict
+from typing import Optional, Dict, TypedDict
 
 class ScraperConf(TypedDict):
     scraper_name:str
     enabled:bool
     scraper_type:str
     url_strategy:str
-    start_link:str|Dict[str, str]
+    start_link:Optional[str]
 
 
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
