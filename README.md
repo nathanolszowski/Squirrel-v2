@@ -16,21 +16,21 @@ List of available agency sites:
 ## Project status
 
 1. Priority 1 :
-- [] Work on code factorization and scraping speed
-- [] Progress bar
-- [] Improve the recovery of longitude/latitude and addresses for all agencies
-- [] Homogenize data collection
-- [] Manage duplicates :
+- [x] Work on code factorization and scraping speed
+- [ ] Progress bar
+- [ ] Improve the recovery of longitude/latitude and addresses for all agencies
+- [ ] Homogenize data collection
+- [ ] Manage duplicates :
    - compare lat/long, adresse, accroche, titre et surface totale
 
 2. Priority 2 :
-- [] Cache system to avoid re-scraping the same pages too often?
-- [] Identification of too large number of None values
+- [ ] Cache system to avoid re-scraping the same pages too often?
+- [ ] Identification of too large number of None values
 
 3. Priority 3 :
-- [] Addition of market sectors
-- [] Compare the new export with the old one
-- [] Natural language processing for resume and amenities (with IA if possible)
+- [ ] Addition of market sectors
+- [ ] Compare the new export with the old one
+- [ ] Natural language processing for resume and amenities (with IA if possible)
 
 
 
@@ -40,7 +40,7 @@ List of available agency sites:
 Squirrel-v2/
 ├── config/
 │   ├── scrapers_config.py      # Configuration for scrapers
-│   └── scrapers_selectors.py     # CSS selectors by scraper
+│   ├── scrapers_selectors.py     # CSS selectors by scraper
 │   └── squirrel_settings.py     # Global configuration
 ├── core/
 │   ├── api_scraper.py           # Class for api scrapers
@@ -61,8 +61,8 @@ Squirrel-v2/
 │   ├── client_handler.py     # Client handler for web scraping requests
 │   └── user_agent.py         # User-agents generator
 ├── tests/
-│   └── datas/
-│       └── test_properties.py
+│   ├── datas/
+│   |    └── test_properties.py
 │   └── network/
 │       ├──test_client_handler.py
 │       └── test_user_agents.py

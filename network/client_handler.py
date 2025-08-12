@@ -62,16 +62,8 @@ class AsyncClientHandler:
         return self.user_agent_liste         
 
     async def _get_user_agent(self) -> str:
-        """Returns a user-agent string for header usage.
-        
-        Returns:
-            self.user_agent (str) : a scored user-agents.
-        """
-        if self.user_agent_liste is None:
-            self.user_agent_liste = await self._init_user_agents_list()
         self.user_agent = self.user_agent_liste.get_user_agent()
         return self.user_agent
-
 
 class HTTPClientHandler(AsyncClientHandler):
     """

@@ -12,26 +12,23 @@ import asyncio
 async def main():
     """Fonction principale"""
 
-    # Logging configuration
     log_file = setup_logging()
     logger = logging.getLogger(__name__)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    # Scrapers list
     scrapers = [CBREScraper()]
-    logger.info("Starting scraping for scrapers")
+    logger.info(f"Starting scraping for scrapers {len(scrapers)}")
     for scraper in scrapers:
         try:
             logger.info(f"Starting scraping for {scraper.scraper_name} ...")
             await scraper.run()
-            exporter = ListingExporter()
-            logger.info(f"Scraping results {scraper.listing.count_properties()}")
-            exporter.export_to_json(scraper.listing)
+            exporter = ListingExporter(scraper.listing)
+            exporter.export_to_json("exports")
         except Exception as e:
-            logger.error(f"Erorr {scraper.scraper_name} : {e}")
+            logger.error(f"Error when running the following scraper : {scraper.scraper_name} : {e}")
 
     logger.info(
-        "Program ending well"
+        "Program finishing well"
     )
 
 if __name__ == "__main__":

@@ -35,7 +35,6 @@ class CBREScraper(VanillaHTTP):
             if match:
                 department_code = match.group(3)[:2]
                 if department_code in DEPARTMENTS_IDF:
-                    logger.info(f"[{url}] Url à scraper (département IDF : {department_code})")
                     return True
                 else:
                     return False

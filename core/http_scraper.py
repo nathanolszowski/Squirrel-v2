@@ -82,6 +82,7 @@ class VanillaHTTP(HTTPScraper):
     
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
+        await self.init_client()
         if self.client is not None:
             try:
                 async with self.client as client:
@@ -185,7 +186,7 @@ class PlaywrightScraper(HTTPScraper):
                 else:
                     self.listing.failed_urls.append(url)
                     continue
-        logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties}")
+        logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
         
     def instance_url_filter(self, url:str):
         """Overwrite to add a url filter at the instance level"""
