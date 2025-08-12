@@ -25,7 +25,7 @@ class BaseScraper(ABC):
         Args:
             config (ScraperConf): Represents a configuration for a scraper with its details
         """
-        self.url_nb:None|int = None # used to limit the number of URLs to scrape 
+        self.url_nb:None|int = 5 # used to limit the number of URLs to scrape 
         self.scraper_name = config.get("scraper_name")
         self.enabled = config.get("enabled")
         self.crawler_strategy = config.get("scraper_type")

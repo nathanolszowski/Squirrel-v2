@@ -4,7 +4,6 @@ Listing exporter class
 """
 
 import json
-from datas.listing_manager import ListingManager
 from datas.property_listing import PropertyListing
 
 class ListingExporter:
