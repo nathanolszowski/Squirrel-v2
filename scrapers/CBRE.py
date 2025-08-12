@@ -9,6 +9,8 @@ from core.http_scraper import VanillaHTTP
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
 from config.squirrel_settings import DEPARTMENTS_IDF
+from datas.property import Property
+from selectolax.parser import HTMLParser
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ class CBREScraper(VanillaHTTP):
             f"[{url}] Url to be scraped"
         )
 
-    def data_hook(self) -> None:
+    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
@@ -48,47 +50,42 @@ class CBREScraper(VanillaHTTP):
             soup (BeautifulSoup): Représente le parser lié à la page html de l'offre à scraper
             url (str): Représente l'url de l'offre à scraper
         """
-        # Surcharger la méthode obtenir la reference
-        reference_element = soup.find("li", class_="LS breadcrumb-item active")
-        reference_element = reference_element.find("span")
-        data["reference"] = (
-            reference_element.get_text(strip=True) if reference_element else "N/A"
-        )
-        # Surcharger la méthode obtenir l'actif
+        # Référence
+        reference_element = page.css_first("li.LS.breadcrumb-item.active span")
+        property.reference = reference_element.text(strip=True) if reference_element else "N/A"
+
+        # Actif
         actif_map = {
             "bureaux": "Bureaux",
             "activites": "Locaux d'activité",
             "entrepots": "Entrepots",
             "coworking": "Bureau équipé",
         }
-        data["actif"] = next(
-            (label for key, label in actif_map.items() if key in url), "N/A"
-        )
-        # Surcharger la méthode obtenir le contrat
+        property.asset_type = next((label for key, label in actif_map.items() if key in url), "N/A")
+
+        # Contrat
         contrat_map = {
             "a-louer": "Location",
             "a-vendre": "Vente",
         }
-        data["contrat"] = next(
-            (label for key, label in contrat_map.items() if key in url), "N/A"
-        )
-        # Surcharger la méthode obtenir l'url image
-        parent_image = soup.find("div", class_="main-image")
-        img_image = parent_image.find("img")
-        if img_image and img_image["src"]:
-            data["url_image"] = img_image["src"]
+        property.contract = next((label for key, label in contrat_map.items() if key in url), "N/A")
 
-        # Surcharger la méthode obtenir la position gps
-        parent = soup.find("a", id="contentHolder_streetMapLink")
+        # URL image
+        img_image = page.css_first("div.main-image img")
+        if img_image and img_image.attributes.get("src"):
+            property.url_image = img_image.attributes["src"]
+
+        # Position GPS
+        parent = page.css_first("a#contentHolder_streetMapLink")
         if parent:
-            href = parent.get("href")
+            href = parent.attributes.get("href", "")
             match = re.search(r"cbll=([\d\.]+),([\d\.]+)", href)
             if match:
-                data["latitude"] = float(match.group(1))
-                data["longitude"] = float(match.group(2))
+                property.latitude = float(match.group(1))
+                property.longitude = float(match.group(2))
             else:
-                data["latitude"] = 48.866669
-                data["longitude"] = 2.33333
+                property.latitude = 48.866669
+                property.longitude = 2.33333
         else:
-            data["latitude"] = 48.866669
-            data["longitude"] = 2.33333
+            property.latitude = 48.866669
+            property.longitude = 2.33333

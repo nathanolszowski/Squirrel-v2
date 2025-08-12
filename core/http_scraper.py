@@ -117,7 +117,7 @@ class VanillaHTTP(HTTPScraper):
                 self.data_hook(property, page, url)
                 return property
     
-    def data_hook(self, data: dict[str], page: HTMLParser, url: str) -> None:
+    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
@@ -268,6 +268,12 @@ class PlaywrightScraper(HTTPScraper):
             )
             return None
         
-    def data_hook(self) -> None:
-        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
+    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
+        """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
+
+        Args:
+            data (dict[str]): Représente les données de l'offre à scraper
+            soup (BeautifulSoup): Représente le parser lié à la page html de l'offre à scraper
+            url (str): Représente l'url de l'offre à scraper
+        """
         pass
