@@ -200,16 +200,15 @@ class HeadlessClientHandler(AsyncClientHandler):
         """This method choose if the client used the default browser or a special scraping browser named Camoufox."""
         await self._init_user_agents_list()
         self.user_agent = await self._get_user_agent()
-        proxy = await self._get_proxy()
+        self.proxy = await self._get_proxy()
+        await self._init_browser_instance()
+
+    async def _init_browser_instance(self):
         if self.camoufox:
-            try:
-                await self._launch_camoufox_browser(proxy)
-            except Exception as e:
-                logger.warning(f"Enabling to use Camoufox : {e} Use default browser.")
-                await self._launch_default_browser(proxy)
+            await self._launch_camoufox_browser(self.proxy if self.proxy_ok else None)
         else:
-            await self._launch_default_browser(proxy)
-            
+            await self._launch_default_browser(self.proxy if self.proxy_ok else None)
+
     async def _launch_camoufox_browser(self, proxy):
         """Start client with Camoufox browser."""
         logger.info("Starting client with Camoufox browser")
@@ -232,7 +231,7 @@ class HeadlessClientHandler(AsyncClientHandler):
             
     async def __aenter__(self):
         """Initialize the http client when entering the context."""
-        if not hasattr(self, "client") or self.client is None:
+        if self.browser is None:
             await self.setup_client()
         return self
     

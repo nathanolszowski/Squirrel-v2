@@ -165,26 +165,27 @@ class PlaywrightScraper(HTTPScraper):
         """Launch the scraper, discover url and scrape all the urls"""
         logger.info(f"[{self.scraper_name}] is starting to scrape data")
         await self.init_client()
-        urls = await self.url_discovery_strategy()
-        if not urls:
-            logger.warning("Cannot find any urls to be scraped")
-            return
-        if self.url_nb is None :
-            for url in urls:
-                prop = await self.get_data(url)
-                if prop is not None:
-                    self.listing.add_property(prop)
-                else:
-                    self.listing.failed_urls.append(url)
-                    continue
-        else:
-            for url in urls[:self.url_nb]:
-                prop = await self.get_data(url)
-                if prop is not None:
-                    self.listing.add_property(prop)
-                else:
-                    self.listing.failed_urls.append(url)
-                    continue
+        async with self.client as client:
+            urls = await self.url_discovery_strategy()
+            if not urls:
+                logger.warning("Cannot find any urls to be scraped")
+                return
+            if self.url_nb is None :
+                for url in urls:
+                    prop = await self.get_data(url)
+                    if prop is not None:
+                        self.listing.add_property(prop)
+                    else:
+                        self.listing.failed_urls.append(url)
+                        continue
+            else:
+                for url in urls[:self.url_nb]:
+                    prop = await self.get_data(url)
+                    if prop is not None:
+                        self.listing.add_property(prop)
+                    else:
+                        self.listing.failed_urls.append(url)
+                        continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
         
     def instance_url_filter(self, url:str):
@@ -202,13 +203,12 @@ class PlaywrightScraper(HTTPScraper):
         """
         if self.browser is not None:
             try:
-                async with self.browser as client:
-                    if client.context is not None:
-                        page = await client.context.new_page()
-                        response = await page.goto(url)
-                    else:
-                        page = await client.browser.new_page()
-                        response = await page.goto(url)
+                if self.client.context is not None:
+                    page = await self.client.context.new_page()
+                    response = await page.goto(url)
+                else:
+                    page = await self.client.browser.new_page()
+                    response = await page.goto(url)
             except Exception as e:
                 logger.error(f"[{self.scraper_name}] Enable to fetch {url} to get data: {e}")
             else:
