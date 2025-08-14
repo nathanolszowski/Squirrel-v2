@@ -80,14 +80,19 @@ class HTTPClientHandler(AsyncClientHandler):
         
     async def setup_client(self) -> httpx.AsyncClient:
         """Sets up the HTTP client with settings."""
+        await self._init_user_agents_list()
         self.user_agent = await self._get_user_agent()
-        proxy = await self._get_proxy()
-        self.client = httpx.AsyncClient(proxy=proxy,
-                        headers={"User-Agent": self.user_agent},
-                        timeout=HTTP_TIMEOUT,
-                        follow_redirects=True,
-                    )
+        self.proxy = await self._get_proxy()
+        await self._init_httpx_client()
         return self.client
+    
+    async def _init_httpx_client(self):
+        self.client = httpx.AsyncClient(
+            proxy=self.proxy if self.proxy_ok else None,
+            headers={"User-Agent": self.user_agent},
+            timeout=HTTP_TIMEOUT,
+            follow_redirects=True,
+        )
     
     async def _request(
         self,
@@ -139,8 +144,7 @@ class HTTPClientHandler(AsyncClientHandler):
             await self.client.aclose()
         self.request_count = 0
         self.reset_threshold = random.randint(20, 40)
-        self.user_agent = await self._get_user_agent()
-        self.client = await self.setup_client()
+        await self.setup_client()
 
     async def get(self, url: str, headers: dict | None = None) -> httpx.Response | None:
         """GET method for the HTTP client, used to collect data from a specified resource
@@ -169,7 +173,7 @@ class HTTPClientHandler(AsyncClientHandler):
     
     async def __aenter__(self):
         """Initialize the http client when entering the context."""
-        if not self.client:
+        if not hasattr(self, "client") or self.client is None:
             await self.setup_client()
         return self
 
@@ -194,6 +198,7 @@ class HeadlessClientHandler(AsyncClientHandler):
                
     async def setup_client(self):
         """This method choose if the client used the default browser or a special scraping browser named Camoufox."""
+        await self._init_user_agents_list()
         self.user_agent = await self._get_user_agent()
         proxy = await self._get_proxy()
         if self.camoufox:
@@ -227,7 +232,7 @@ class HeadlessClientHandler(AsyncClientHandler):
             
     async def __aenter__(self):
         """Initialize the http client when entering the context."""
-        if not self.browser:
+        if not hasattr(self, "client") or self.client is None:
             await self.setup_client()
         return self
     

@@ -27,7 +27,6 @@ class CBREScraper(VanillaHTTP):
         )
 
         if not url.startswith("https://immobilier.cbre.fr/offre/"):
-            logger.info(f"[{url}] Url non conforme au préfixe attendu")
             return False
 
         if "bureaux" in url:
@@ -39,7 +38,6 @@ class CBREScraper(VanillaHTTP):
                 else:
                     return False
             else:
-                logger.info(f"[{url}] Ne correspond pas au pattern attendu")
                 return False
         return False
 

@@ -80,8 +80,7 @@ class BaseScraper(ABC):
                 if isinstance(self.start_link, dict):
                     logger.info("Fetching urls from multiple sitemaps")
                     for actif, url in self.start_link.items():
-                        async with self.client as client:
-                            response = await client.get(url)
+                        response = await self.client.get(url)
                         if response is None:
                             logger.warning(f"No response from : {url}")
                             failed_urls.append(url)
@@ -93,19 +92,19 @@ class BaseScraper(ABC):
                                 urls.append(loc_node.text())
                 else:
                     logger.info("Fetching urls from a single sitemap")
-                    async with self.client as client:
-                        response = await client.get(self.start_link)
-                        if response is None:
-                            logger.warning(f"No response from : {self.start_link}")
-                            failed_urls.append(self.start_link)
-                        else:
-                            page = HTMLParser(response.text)
-                            for node in page.css("url"):
-                                loc_node = node.css_first("loc")
-                                if loc_node and self._filter_url(loc_node.text()):
-                                    urls.append(loc_node.text())
+                    response = await self.client.get(self.start_link)
+                    if response is None:
+                        logger.warning(f"No response from : {self.start_link}")
+                        failed_urls.append(self.start_link)
+                    else:
+                        page = HTMLParser(response.text)
+                        for node in page.css("url"):
+                            loc_node = node.css_first("loc")
+                            if loc_node and self._filter_url(loc_node.text()):
+                                urls.append(loc_node.text())
                 if failed_urls:
                     logger.warning(f"Sitemaps failed to load: {failed_urls}")
+                logger.info(f"Sitemaps failed to load: {len(urls)}")
                 return urls
 
             except Exception as e:
