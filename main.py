@@ -5,6 +5,7 @@ Main program
 
 from utils.logging import setup_logging
 from scrapers.CBRE import CBREScraper
+from scrapers.JLL import JLLScraper
 from datas.listing_exporter import ListingExporter
 import logging
 import asyncio
@@ -16,7 +17,7 @@ async def main():
     logger = logging.getLogger(__name__)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    scrapers = [CBREScraper()]
+    scrapers = [CBREScraper(), JLLScraper()]
     logger.info(f"Starting scraping for scrapers {len(scrapers)}")
     for scraper in scrapers:
         try:
