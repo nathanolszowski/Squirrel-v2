@@ -188,9 +188,9 @@ class PlaywrightScraper(HTTPScraper):
                         continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
         
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str)-> bool:
         """Overwrite to add a url filter at the instance level"""
-        pass
+        return True
     
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an Playwright Page
@@ -259,9 +259,9 @@ class PlaywrightScraper(HTTPScraper):
             return None
         try:
             locator = page.locator(selector)
-            if await locator.count() == 0:
+            if locator.count() == 0:
                 return None
-            text = await locator.text_content()
+            text = locator.text_content()
             return text.strip() if text else None
         except Exception as e:
             logger.error(

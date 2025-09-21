@@ -78,13 +78,14 @@ class CBREScraper(VanillaHTTP):
         parent = page.css_first("a#contentHolder_streetMapLink")
         if parent:
             href = parent.attributes.get("href", "")
-            match = re.search(r"cbll=([\d\.]+),([\d\.]+)", href)
-            if match:
-                property.latitude = float(match.group(1))
-                property.longitude = float(match.group(2))
-            else:
-                property.latitude = 48.866669
-                property.longitude = 2.33333
+            if isinstance(href, str):
+                match = re.search(r"cbll=([\d\.]+),([\d\.]+)", href)
+                if match:
+                    property.latitude = float(match.group(1))
+                    property.longitude = float(match.group(2))
+                else:
+                    property.latitude = 48.866669
+                    property.longitude = 2.33333
         else:
             property.latitude = 48.866669
             property.longitude = 2.33333
