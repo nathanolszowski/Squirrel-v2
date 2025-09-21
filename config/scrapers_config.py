@@ -2,20 +2,20 @@
 """
 Scrapers configuration
 """
-from typing import Optional, Dict, TypedDict
+from typing import Dict, TypedDict
 
 class ScraperConf(TypedDict):
     scraper_name:str
     enabled:bool
     scraper_type:str
     url_strategy:str
-    start_link:Optional[str]
+    start_link:str|dict
 
 
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     "BNP": {
         "scraper_name": "BNP",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": {
@@ -41,21 +41,21 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ALEXBOLTON": {
         "scraper_name": "ALEXBOLTON",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
     },
     "CUSHMAN": {
         "scraper_name": "CUSHMAN",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cushmanwakefield.fr/sitemap.xml",
     },
     "KNIGHTFRANK": {
         "scraper_name": "KNIGHTFRANK",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "URL",
         "start_link": {
@@ -65,14 +65,14 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ARTHURLOYD": {
         "scraper_name": "ARTHURLOYD",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",
     },
     "SAVILLS": {
         "scraper_name": "SAVILLS",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "API",
         "url_strategy": "API",
         "start_link": {

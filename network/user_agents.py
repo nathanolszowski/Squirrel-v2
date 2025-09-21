@@ -177,7 +177,7 @@ class ListUserAgent:
             user_agents_string = []
             for url in user_agents_liens:
                 response = await client.get(url)
-                soup = BeautifulSoup(response.content, "html.parser")
+                soup = BeautifulSoup(response.text, "html.parser")
                 ua_chaine = soup.select_one("body > div:nth-child(1) > main > h1")
                 if ua_chaine:
                     ua_chaine = ua_chaine.get_text()

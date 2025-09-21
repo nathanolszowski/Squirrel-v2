@@ -28,15 +28,15 @@ class HTTPScraper(BaseScraper):
         """Launch the scraper, discover url and scrape all the urls"""
         pass
     
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        pass
+        return True
       
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
         pass
     
-    def data_hook(self) -> None:
+    def data_hook(self, property:Property, page:HTMLParser, url:str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
   
@@ -77,9 +77,9 @@ class VanillaHTTP(HTTPScraper):
                         continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
 
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        pass
+        return True
     
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""

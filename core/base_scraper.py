@@ -52,7 +52,7 @@ class BaseScraper(ABC):
         pass
     
     @abstractmethod
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pass
 

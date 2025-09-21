@@ -25,7 +25,6 @@ class AsyncClientHandler:
     def __init__(self):
         self.proxy: str | None = PROXY if PROXY else None
         self.proxy_ok: bool = False
-        self.user_agent_liste: ListUserAgent | None = None
     
     async def _get_proxy(self) -> str | None:
         """Returns the proxy used by the client.

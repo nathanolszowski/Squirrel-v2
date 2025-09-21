@@ -30,9 +30,9 @@ class APIScraper(BaseScraper):
         """Initialize the http client for the actual scraper"""
         pass
     
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        pass
+        return True
 
 class VanillaAPI(APIScraper):
 
@@ -52,6 +52,6 @@ class VanillaAPI(APIScraper):
         """Collect data from an HTML page"""
         pass
 
-    def instance_url_filter(self, url:str):
+    def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        pass
+        return True
