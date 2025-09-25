@@ -7,10 +7,9 @@ from core.base_scraper import BaseScraper
 import logging
 from typing import Any
 from datas.property import Property
-from selectolax.parser import HTMLParser
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
-from playwright.sync_api import Page
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +21,6 @@ class HTTPScraper(BaseScraper):
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
         pass
-    
-    def instance_url_filter(self, url:str) -> bool:
-        """Overwrite to add a url filter at the instance level"""
-        return True
       
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
@@ -34,6 +29,10 @@ class HTTPScraper(BaseScraper):
     def data_hook(self, property:Property, page:HTMLParser, url:str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
+    
+    def instance_url_filter(self, url:str) -> bool:
+        """Overwrite to add a url filter at the instance level"""
+        return True
   
 class VanillaHTTP(HTTPScraper):
     
@@ -66,10 +65,6 @@ class VanillaHTTP(HTTPScraper):
                         self.listing.failed_urls.append(url)
                         continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
-
-    def instance_url_filter(self, url:str) -> bool:
-        """Overwrite to add a url filter at the instance level"""
-        return True
     
     async def get_data(self, url:str) -> Property|None:
         """Collect data from an HTML page"""
@@ -118,26 +113,9 @@ class VanillaHTTP(HTTPScraper):
         """
         pass
     
-    def safe_select_text(self, tree:HTMLParser, selector:str|None) -> Any:
-        """
-        Extract text from an HTML element securely from a Selectolax tree.
-
-        Args:
-            tree (HTMLParser): HTML tree parsed by selectolax
-            selector (str): CSS selector from settings.py
-        Returns:
-            (str): Selector text value else None
-        """
-        if selector is None:
-            return None
-        try:
-            node = tree.css_first(selector)
-            return node.text(strip=True) if node else None
-        except Exception as e:
-            logger.error(
-                f"[{self.scraper_name}] Error with the following css selector='{selector}': {e}"
-            )
-            return None
+    def instance_url_filter(self, url:str) -> bool:
+        """Overwrite to add a url filter at the instance level"""
+        return True
 
 class PlaywrightScraper(HTTPScraper):
 
@@ -227,10 +205,6 @@ class PlaywrightScraper(HTTPScraper):
                     price=await self.safe_select_text(page, self.selectors.get("global_price")),
                 )
                 return property
-
-    async def safe_select_text(self, page:Page, selector: str | None) -> str | None:
-        """Extract text from an HTML element securely with Playwright."""
-        pass
         
     def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
