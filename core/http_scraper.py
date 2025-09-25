@@ -8,7 +8,6 @@ import logging
 from typing import Any
 from datas.property import Property
 from selectolax.parser import HTMLParser
-from network.client_handler import HTTPClientHandler, HeadlessClientHandler
 from config.scrapers_selectors import SelectorFields
 from config.scrapers_config import ScraperConf
 from playwright.sync_api import Page
