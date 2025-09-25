@@ -25,10 +25,6 @@ class APIScraper(BaseScraper):
         """Collect data from an HTML page"""
         pass
     
-    async def init_client(self) -> None:
-        """Initialize the http client for the actual scraper"""
-        pass
-    
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         return True
@@ -41,11 +37,6 @@ class VanillaAPI(APIScraper):
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
         pass
-
-    async def init_client(self) -> None:
-        """Initialize the http client for the actual scraper"""
-        self.client = HTTPClientHandler()
-        await self.client.setup_client()
 
     async def get_data(self, url: str) -> Property|None:
         """Collect data from an HTML page"""

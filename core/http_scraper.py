@@ -19,10 +19,6 @@ class HTTPScraper(BaseScraper):
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
         
-    async def init_client(self) -> None:
-        """Initialize the http client for the actual scraper"""
-        pass
-        
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
         pass
@@ -43,11 +39,6 @@ class VanillaHTTP(HTTPScraper):
     
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
-        
-    async def init_client(self) -> None:
-        """Initialize the http client for the actual scraper"""
-        self.client = HTTPClientHandler()
-        await self.client.setup_client()
         
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
@@ -153,13 +144,6 @@ class PlaywrightScraper(HTTPScraper):
     def __init__(self, config:ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
         
-    async def init_client(self) -> None:
-        """Initialize the http client for the actual scraper"""
-        self.client = HTTPClientHandler()
-        await self.client.setup_client()
-        self.browser = HeadlessClientHandler()
-        await self.browser.setup_client()
-        
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
         logger.info(f"[{self.scraper_name}] is starting to scrape data")
@@ -245,28 +229,8 @@ class PlaywrightScraper(HTTPScraper):
                 return property
 
     async def safe_select_text(self, page:Page, selector: str | None) -> str | None:
-        """Extract text from an HTML element securely with Playwright.
-
-        Args:
-            page (Page): Playwright page object
-            selector (str | None): CSS selector from the config
-
-        Returns:
-            str | None: Extracted text or None
-        """
-        if selector is None:
-            return None
-        try:
-            locator = page.locator(selector)
-            if locator.count() == 0:
-                return None
-            text = locator.text_content()
-            return text.strip() if text else None
-        except Exception as e:
-            logger.error(
-                f"[{self.scraper_name}] Error with selector '{selector}': {e}"
-            )
-            return None
+        """Extract text from an HTML element securely with Playwright."""
+        pass
         
     def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
