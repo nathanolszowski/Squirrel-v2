@@ -41,7 +41,7 @@ class CBREScraper(VanillaHTTP):
                 return False
         return False
 
-    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
+    def data_hook(self, property:Property, page, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:

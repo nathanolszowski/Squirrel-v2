@@ -26,6 +26,16 @@ class APIScraper(BaseScraper):
         """Collect data from an HTML page"""
         pass
     
+    async def url_discovery_strategy(self) -> list[str]|None:
+        """This method is used to collect the Urls to be scraped.
+        It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
+
+        Returns:
+            list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
+        """
+        pass
+    
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         return True
+
