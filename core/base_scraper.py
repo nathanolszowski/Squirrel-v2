@@ -42,6 +42,16 @@ class BaseScraper(ABC):
         pass
     
     @abstractmethod
+    async def url_discovery_strategy(self) -> list[str]|None:
+        """This method is used to collect the Urls to be scraped.
+        It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
+
+        Returns:
+            list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
+        """
+        pass
+    
+    @abstractmethod
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pass
@@ -55,53 +65,7 @@ class BaseScraper(ABC):
         """Retourne True si l'URL passe tous les filtres."""
         return self.instance_url_filter(url) and BaseScraper.global_url_filter(url)
 
-    async def url_discovery_strategy(self) -> list[str]|None:
-        """This method is used to collect the Urls to be scraped.
-        It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
 
-        Returns:
-            list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
-        """
-
-        logger.info("Fetch urls from xml sitemap")
-        failed_urls = []
-        try:
-            urls = []
-            if isinstance(self.start_link, dict):
-                logger.info("Fetching urls from multiple sitemaps")
-                for actif, url in self.start_link.items():
-                    response = await self.client.get(url)
-                    if response is None:
-                        logger.warning(f"No response from : {url}")
-                        failed_urls.append(url)
-                        continue
-                    page = HTMLParser(response.text)
-                    for node in page.css("url"):
-                        loc_node = node.css_first("loc")
-                        if loc_node and self._filter_url(loc_node.text()):
-                            urls.append(loc_node.text())
-            else:
-                logger.info("Fetching urls from a single sitemap")
-                response = await self.client.get(self.start_link)
-                if response is None:
-                    logger.warning(f"No response from : {self.start_link}")
-                    failed_urls.append(self.start_link)
-                else:
-                    page = HTMLParser(response.text)
-                    for node in page.css("url"):
-                        loc_node = node.css_first("loc")
-                        if loc_node and self._filter_url(loc_node.text()):
-                            urls.append(loc_node.text())
-            if failed_urls:
-                logger.warning(f"Sitemaps failed to load: {failed_urls}")
-            logger.info(f"Sitemaps failed to load: {len(urls)}")
-            return urls
-
-        except Exception as e:
-            logger.error(
-                f"Error when fetching urls for {self.scraper_name}: {e}"
-            )
-            return []
         
         
     

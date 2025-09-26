@@ -5,6 +5,7 @@ API Scraper module.
 
 from base_scraper import BaseScraper
 from datas.property import Property
+from scrapling.fetchers import Fetcher
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,23 +26,6 @@ class APIScraper(BaseScraper):
         """Collect data from an HTML page"""
         pass
     
-    def instance_url_filter(self, url:str) -> bool:
-        """Overwrite to add a url filter at the instance level"""
-        return True
-
-class VanillaAPI(APIScraper):
-
-    def __init__(self, config, selectors, base_url, base_url_property, api_url):
-        super().__init__(config, selectors, base_url, base_url_property, api_url)
-
-    async def run(self) -> None:
-        """Launch the scraper, discover url and scrape all the urls"""
-        pass
-
-    async def get_data(self, url: str) -> Property|None:
-        """Collect data from an HTML page"""
-        pass
-
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         return True
