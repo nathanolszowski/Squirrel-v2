@@ -5,6 +5,9 @@ This module provides a base class for scrapers, defining the common interface an
 """
 
 from abc import ABC, abstractmethod
+from scrapling import Selector
+from scrapling.fetchers import AsyncStealthySession, AsyncDynamicSession
+from config.squirrel_settings import PROXY
 from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
 from datas.property import Property
@@ -22,7 +25,7 @@ class BaseScraper(ABC):
         Args:
             config (ScraperConf): Represents a configuration for a scraper with its details
         """
-        self.url_nb:None|int = 5 # used to limit the number of URLs to scrape 
+        self.url_nb:None|int = 5 # used to limit the number of URLs to be scraped
         self.scraper_name = config.get("scraper_name")
         self.enabled = config.get("enabled")
         self.crawler_strategy = config.get("scraper_type")
@@ -37,11 +40,14 @@ class BaseScraper(ABC):
         pass
     
     @abstractmethod
-    async def get_data(self, url: str) -> Property|None:
-        """Collect data from an HTML page"""
+    async def get_data(self, page: Selector, url:str) -> Property | None:
+        """Collect data from an HTML element
+        
+        Returns:
+            Property | None: Represents a Property dataclass with all the data scraped or None if the scraper failed to scrape the data
+        """
         pass
     
-    @abstractmethod
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.
         It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
@@ -49,20 +55,47 @@ class BaseScraper(ABC):
         Returns:
             list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
         """
-        pass
+        logger.info("Fetch urls from xml sitemap")
+        responses = []
+        urls_discovery = []
+
+        if isinstance(self.start_link, dict):
+            logger.info("Fetching urls from multiple sitemaps")
+            for actif, url in self.start_link.items():
+                urls_discovery.append(url)
+        else:
+            logger.info("Fetching urls from a single sitemap")
+            urls_discovery.append(self.start_link)
+
+        try:
+            async with AsyncDynamicSession() as session:
+                for url in urls_discovery:
+                    page = await session.fetch(url)
+                    responses.append(loc for loc in page.xpath('//url/loc/text()'))
+        except Exception as e:
+            logger.error(f"AsyncDynamicSession failed: {e}")
+            try:
+                async with AsyncStealthySession() as session:
+                    for url in urls_discovery:
+                        page = await session.fetch(url)
+                        responses.append(loc for loc in page.xpath('//url/loc/text()'))
+            except Exception as e:
+                logger.error(f"AsyncStealthySession failed: {e}")
+        else:
+            logger.info(f"Successfully fetched {len(responses)} sitemaps")
+
+    @classmethod
+    def global_url_filter(cls, url:str) -> bool:
+        """Add a url filter at the class level"""
+        return True
     
     @abstractmethod
     def instance_url_filter(self, url:str) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pass
 
-    @classmethod
-    def global_url_filter(cls, url:str) -> bool:
-        """Add a url filter at the class level"""
-        return True
-
-    def _filter_url(self, url:str) -> bool:
-        """Retourne True si l'URL passe tous les filtres."""
+    def filter_url(self, url:str) -> bool:
+        """Return True if all filters are true."""
         return self.instance_url_filter(url) and BaseScraper.global_url_filter(url)
 
 

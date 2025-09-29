@@ -5,16 +5,15 @@ Scraper for CBRE
 
 import logging
 import re
-from core.http_scraper import VanillaHTTP
+from core.http_scraper import HTTPScraper
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
 from config.squirrel_settings import DEPARTMENTS_IDF
 from datas.property import Property
-from selectolax.parser import HTMLParser
 
 logger = logging.getLogger(__name__)
 
-class CBREScraper(VanillaHTTP):
+class CBREScraper(HTTPScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
