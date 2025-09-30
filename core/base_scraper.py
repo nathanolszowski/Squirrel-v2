@@ -48,6 +48,7 @@ class BaseScraper(ABC):
         """
         pass
     
+    @abstractmethod
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.
         It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
@@ -55,46 +56,19 @@ class BaseScraper(ABC):
         Returns:
             list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
         """
-        logger.info("Fetch urls from xml sitemap")
-        responses = []
-        urls_discovery = []
-
-        if isinstance(self.start_link, dict):
-            logger.info("Fetching urls from multiple sitemaps")
-            for actif, url in self.start_link.items():
-                urls_discovery.append(url)
-        else:
-            logger.info("Fetching urls from a single sitemap")
-            urls_discovery.append(self.start_link)
-
-        try:
-            async with AsyncDynamicSession() as session:
-                for url in urls_discovery:
-                    page = await session.fetch(url)
-                    responses.append(loc for loc in page.xpath('//url/loc/text()'))
-        except Exception as e:
-            logger.error(f"AsyncDynamicSession failed: {e}")
-            try:
-                async with AsyncStealthySession() as session:
-                    for url in urls_discovery:
-                        page = await session.fetch(url)
-                        responses.append(loc for loc in page.xpath('//url/loc/text()'))
-            except Exception as e:
-                logger.error(f"AsyncStealthySession failed: {e}")
-        else:
-            logger.info(f"Successfully fetched {len(responses)} sitemaps")
+        pass
 
     @classmethod
-    def global_url_filter(cls, url:str) -> bool:
+    def global_url_filter(cls, url:str|Selector) -> bool:
         """Add a url filter at the class level"""
         return True
     
     @abstractmethod
-    def instance_url_filter(self, url:str) -> bool:
+    def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pass
 
-    def filter_url(self, url:str) -> bool:
+    def filter_url(self, url:str|Selector) -> bool:
         """Return True if all filters are true."""
         return self.instance_url_filter(url) and BaseScraper.global_url_filter(url)
 

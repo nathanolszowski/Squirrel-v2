@@ -26,8 +26,8 @@ class HTTPScraper(BaseScraper):
         if not urls:
             logger.warning("Cannot find any urls to be scraped")
             return None
-        
-        # ====> Intégrer les requêteurs <====
+        logger.info(f"[{self.scraper_name}] has discovered {len(urls)} urls to be scraped")
+
         if self.url_nb is None :
             async with AsyncDynamicSession() as session:
                 try:
@@ -47,7 +47,52 @@ class HTTPScraper(BaseScraper):
                     self.listing.failed_urls.append(url)
                     continue
         logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
-      
+        
+    async def url_discovery_strategy(self) -> list[str]|None:
+        """This method is used to collect the Urls to be scraped.
+        It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
+
+        Returns:
+            list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
+        """
+        logger.info("Fetch urls from xml sitemap")
+        responses = []
+        urls_discovery = []
+
+        if isinstance(self.start_link, dict):
+            logger.info("Fetching urls from multiple sitemaps")
+            for actif, url in self.start_link.items():
+                urls_discovery.append(url)
+        else:
+            logger.info("Fetching urls from a single sitemap")
+            urls_discovery.append(self.start_link)
+
+        try:
+            async with AsyncDynamicSession() as session:
+                for url in urls_discovery:
+                    page = await session.fetch(url)
+                    response = page.xpath('//url/loc/text()')
+                    for url in response:
+                        if self.filter_url(url):
+                            responses.append(url)
+        except Exception as e:
+            logger.error(f"AsyncDynamicSession failed: {e}")
+            try:
+                async with AsyncStealthySession() as session:
+                    for url in urls_discovery:
+                        page = await session.fetch(url)
+                        response = page.xpath('//url/loc/text()')
+                        for url in response:
+                            if self.filter_url(url):
+                                responses.append(url)
+            except Exception as e:
+                logger.error(f"AsyncStealthySession failed: {e}")
+                logger.warning("Both sessions failed to fetch the sitemap(s)")
+                return None
+        else:
+            logger.info(f"Successfully fetched {len(responses)} sitemaps")
+            return responses
+        
     async def get_data(self, page: Selector, url:str) -> Property | None:
         """Collect data from an HTML element
         
@@ -86,7 +131,7 @@ class HTTPScraper(BaseScraper):
         self.data_hook(property, page, url)
         return property
     
-    def data_hook(self, property:Property, page: Selector, url:str) -> None:
+    def data_hook(self, property:Property, page:Selector, url:str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
 

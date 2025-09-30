@@ -6,6 +6,7 @@ Scraper for CBRE
 import logging
 import re
 from core.http_scraper import HTTPScraper
+from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
 from config.squirrel_settings import DEPARTMENTS_IDF
@@ -19,26 +20,25 @@ class CBREScraper(HTTPScraper):
     def __init__(self):
         super().__init__(SCRAPER_CONFIG["CBRE"], SELECTORS["CBRE"])
 
-    def instance_url_filter(self, url:str) -> bool:
+    def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pattern = re.compile(
             r"https://immobilier\.cbre\.fr/offre/(a-louer|a-vendre)/(bureaux|coworking)/(\d+)"
         )
-
+        url = str(url)
         if not url.startswith("https://immobilier.cbre.fr/offre/"):
             return False
 
-        if "bureaux" in url:
-            match = pattern.match(url)
-            if match:
-                department_code = match.group(3)[:2]
-                if department_code in DEPARTMENTS_IDF:
-                    return True
-                else:
-                    return False
+        match = pattern.match(url)
+        if match:
+            department_code = match.group(3)[:2]
+            if department_code in DEPARTMENTS_IDF:
+                return True
             else:
                 return False
-        return False
+        else:
+            return False
+
 
     def data_hook(self, property:Property, page, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass

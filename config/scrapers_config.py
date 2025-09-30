@@ -15,7 +15,7 @@ class ScraperConf(TypedDict):
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     "BNP": {
         "scraper_name": "BNP",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": {

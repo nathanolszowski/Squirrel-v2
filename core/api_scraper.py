@@ -5,7 +5,7 @@ API Scraper module.
 
 from base_scraper import BaseScraper
 from datas.property import Property
-from scrapling.fetchers import Fetcher
+from scrapling import Selector
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class APIScraper(BaseScraper):
         """Launch the scraper, discover url and scrape all the urls"""
         pass
     
-    async def get_data(self, url: str) -> Property|None:
+    async def get_data(self, page: Selector, url: str) -> Property|None:
         """Collect data from an HTML page"""
         pass
     

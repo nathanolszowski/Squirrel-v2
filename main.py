@@ -5,6 +5,7 @@ Main program
 
 from utils.logging import setup_logging
 from scrapers.CBRE import CBREScraper
+from scrapers.BNP import BNPScraper
 from datas.listing_exporter import ListingExporter
 import logging
 import asyncio
