@@ -17,7 +17,7 @@ class CUSHMANScraper(HTTPScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
-        super().__init__(SCRAPER_CONFIG["CUSHMANWAKEFIELD"], SELECTORS["CUSHMANWAKEFIELD"])
+        super().__init__(SCRAPER_CONFIG["CUSHMAN"], SELECTORS["CUSHMANWAKEFIELD"])
 
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""

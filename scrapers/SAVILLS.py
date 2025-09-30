@@ -4,7 +4,7 @@ Scraper for SAVILLS
 """
 
 import logging
-from core.http_scraper import HTTPScraper
+from core.api_scraper import APIScraper
 from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
@@ -13,11 +13,11 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class SAVILLSScraper(HTTPScraper):
-    """CBRE scraper which inherits from VanillaHTTP class"""
+class SAVILLSScraper(APIScraper):
+    """SAVILLS scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
-        super().__init__(SCRAPER_CONFIG["BNP"], SELECTORS["BNP"])
+        super().__init__(SCRAPER_CONFIG["SAVILLS"], None, "https://search.savills.com", "https://search.savills.com/fr/fr/bien-immobilier-details/", "https://livev6-searchapi.savills.com/Data/SearchByUrl")
 
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""

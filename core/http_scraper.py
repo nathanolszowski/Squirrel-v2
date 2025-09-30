@@ -6,6 +6,7 @@ HTTP Scraper module.
 from core.base_scraper import BaseScraper
 import logging
 from config.squirrel_settings import PROXY
+from typing import Any
 from scrapling.fetchers import AsyncStealthySession, AsyncDynamicSession
 from scrapling import Selector
 from datas.property import Property
@@ -64,40 +65,41 @@ class HTTPScraper(BaseScraper):
             logger.info(f"Successfully fetched {len(responses)} sitemaps")
             return responses
         
+    async def select_text(self, selector, page:Selector) -> Any|None:
+        """Helper function to select text from a selector"""
+        if selector:
+            node = page.css_first(selector)
+            return node.text if node else None
+        return None
+        
     async def get_data(self, page: Selector, url:str) -> Property | None:
         """Collect data from an HTML element
         
         Returns:
             Property | None: Represents a Property dataclass with all the data scraped or None if the scraper failed to scrape the data
         """
-        def select_text(selector):
-            if selector:
-                node = page.css_first(selector)
-                return node.text if node else None
-            return None
-
         property = Property(
             agency=self.scraper_name,
             url=url,
-            reference=select_text(self.selectors.get("reference")),
-            asset_type=select_text(self.selectors.get("asset_type")),
-            contract=select_text(self.selectors.get("contract")),
-            disponibility=select_text(self.selectors.get("disponibility")),
-            area=select_text(self.selectors.get("area")),
+            reference=await self.select_text(self.selectors.get("reference"), page),
+            asset_type=await self.select_text(self.selectors.get("asset_type"), page),
+            contract=await self.select_text(self.selectors.get("contract"), page),
+            disponibility=await self.select_text(self.selectors.get("disponibility"), page),
+            area=await self.select_text(self.selectors.get("area"), page),
             division=(
-                select_text(self.selectors.get("division"))
+                await self.select_text(self.selectors.get("division"), page)
                 if self.selectors.get("division", None) is not None
                 else "Non divisible"
             ),
-            adress=select_text(self.selectors.get("adress")),
-            postal_code=select_text(self.selectors.get("postal_code")),
-            contact=select_text(self.selectors.get("contact")),
-            resume=select_text(self.selectors.get("resume")),
-            amenities=select_text(self.selectors.get("amenities")),
-            url_image=select_text(self.selectors.get("url_image")),
-            latitude=select_text(self.selectors.get("latitude")),
-            longitude=select_text(self.selectors.get("longitude")),
-            price=select_text(self.selectors.get("global_price")),
+            adress= await self.select_text(self.selectors.get("adress"), page),
+            postal_code= await self.select_text(self.selectors.get("postal_code"), page),
+            contact= await self.select_text(self.selectors.get("contact"), page),
+            resume= await self.select_text(self.selectors.get("resume"), page),
+            amenities= await self.select_text(self.selectors.get("amenities"), page),
+            url_image= await self.select_text(self.selectors.get("url_image"), page),
+            latitude= await self.select_text(self.selectors.get("latitude"), page),
+            longitude= await self.select_text(self.selectors.get("longitude"), page),
+            price= await self.select_text(self.selectors.get("global_price"), page),
         )
         await self.data_hook(property, page, url)
         return property

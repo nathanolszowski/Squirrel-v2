@@ -3,7 +3,7 @@
 API Scraper module.
 """
 
-from base_scraper import BaseScraper
+from core.base_scraper import BaseScraper
 from datas.property import Property
 from scrapling import Selector
 import logging

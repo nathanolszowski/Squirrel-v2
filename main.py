@@ -23,9 +23,9 @@ async def main():
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     scrapers = [CBREScraper(), BNPScraper(), JLLScraper(), ARTHURLOYDScraper(), SAVILLSScraper(), KNIGHTFRANKScraper(), CUSHMANScraper()]
-    logger.info(f"Starting scraping for scrapers {len(scrapers)}")
-    for scraper in scrapers:
-        if scraper.enabled:
+    enabled_scrapers = [scraper for scraper in scrapers if scraper.enabled]
+    logger.info(f"Starting scraping for scrapers {len(enabled_scrapers)} / {len(scrapers)} enabled : {[scraper.scraper_name for scraper in enabled_scrapers]}")
+    for scraper in enabled_scrapers:
             try:
                 logger.info(f"Starting scraping for {scraper.scraper_name} ...")
                 await scraper.run()
@@ -33,8 +33,6 @@ async def main():
                 exporter.export_to_json("exports")
             except Exception as e:
                 logger.error(f"Error when running the following scraper : {scraper.scraper_name} : {e}")
-        else:
-            logger.info(f"Skipping disabled scraper {scraper.scraper_name}")
 
     logger.info(
         f"Program finishing properly, please check the log file {log_file} for details and the exported data in the folder exports",

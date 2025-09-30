@@ -25,7 +25,6 @@ class CBREScraper(HTTPScraper):
         pattern = re.compile(
             r"https://immobilier\.cbre\.fr/offre/(a-louer|a-vendre)/(bureaux|coworking)/(\d+)"
         )
-        url = str(url)
         if not url.startswith("https://immobilier.cbre.fr/offre/"):
             return False
 
@@ -44,9 +43,9 @@ class CBREScraper(HTTPScraper):
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
-            data (dict[str]): Représente les données de l'offre à scraper
-            soup (BeautifulSoup): Représente le parser lié à la page html de l'offre à scraper
-            url (str): Représente l'url de l'offre à scraper
+            property (Property): Represent the data of the property to scrape
+            page (Selector): Selector linked to the html page of the property to scrape
+            url (str): Url of the property to scrape
         """
         # Référence
         reference_element = page.css_first("li.LS.breadcrumb-item.active span")
