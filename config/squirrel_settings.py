@@ -10,9 +10,6 @@ PROXY = ""
 SIMPLE_TIMEOUT = 1000  # milliseconds
 ADVANCED_TIMEOUT = 2000  # milliseconds
 
-# Playwright configuration
-CAMOUFOX = False
-
 # Updating user_agents list or not
 USER_AGENT_UPDATE = False
 

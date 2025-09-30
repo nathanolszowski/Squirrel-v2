@@ -13,15 +13,13 @@ class ListingManager:
         """Initializes the listing manager."""
         self.listings: dict[str, PropertyListing] = {}
         
-    def add_listing(self, name_agency_listing: str) -> PropertyListing:
+    def add_listing(self, property_listing) -> None:
         """Adds a new property listing to the manager.
         
         Returns:
-            listing (PropertyListing): The created property listing instance.
+            property_listing (PropertyListing): The created property listing instance.
         """
-        listing = PropertyListing(name_agency_listing)
-        self.listings[name_agency_listing] = listing
-        return listing
+        self.listings[property_listing.name_agency_listing] = property_listing
     
     def get_all_properties(self) -> list[Property]:
         """Returns all properties from all listings.
