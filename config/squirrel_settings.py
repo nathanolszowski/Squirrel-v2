@@ -7,8 +7,8 @@ Script global variables settings
 PROXY = ""
 
 # Timeouts
-HTTP_TIMEOUT = 10  # seconds
-PLAYWRIGHT_WAIT_TIME = 15  # seconds
+SIMPLE_TIMEOUT = 1000  # milliseconds
+ADVANCED_TIMEOUT = 2000  # milliseconds
 
 # Playwright configuration
 CAMOUFOX = False
