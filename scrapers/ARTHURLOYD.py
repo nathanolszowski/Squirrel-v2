@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Scraper for BNP
+Scraper for ARTHURLOYD
 """
 
 import logging
@@ -13,11 +13,11 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class BNPScraper(HTTPScraper):
+class ARTHURLOYDScraper(HTTPScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
-        super().__init__(SCRAPER_CONFIG["BNP"], SELECTORS["BNP"])
+        super().__init__(SCRAPER_CONFIG["ARTHURLOYD"], SELECTORS["ARTHURLOYD"])
 
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
