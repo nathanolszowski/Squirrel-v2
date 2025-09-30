@@ -34,10 +34,61 @@ class BaseScraper(ABC):
         self.selectors:SelectorFields = selectors
         self.listing:PropertyListing = PropertyListing(self.scraper_name)
     
-    @abstractmethod
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""
-        pass
+        """Launch the scraper, discover url and scrape all the urls"""
+        logger.info(f"[{self.scraper_name}] is starting to scrape data")
+        urls = await self.url_discovery_strategy()
+        if not urls:
+            logger.warning("Cannot find any urls to be scraped")
+            return None
+        logger.info(f"[{self.scraper_name}] has discovered {len(urls)} urls to be scraped")
+
+        if self.url_nb is None :
+            logger.info("Scraping all the selected urls")
+            try:
+                async with AsyncDynamicSession() as session:
+                    for url in urls:
+                        page = await session.fetch(url)
+                        prop = await self.get_data(page, url)
+                        if prop is not None:
+                            self.listing.add_property(prop)
+            except Exception as e:
+                logger.error(f"Failed to scrape with DynamicSession because : {e}")
+                try:
+                    async with AsyncStealthySession() as session:
+                        for url in urls:
+                            page = await session.fetch(url)
+                            prop = await self.get_data(page, url)
+                            if prop is not None:
+                                self.listing.add_property(prop)
+                except Exception as e:
+                    self.listing.failed_urls.append(url)
+                    logger.error(f"Both sessions failed for scraping because : {e}")
+        else:
+            logger.info(f"Scraping only {self.url_nb} urls")
+            try:
+                async with AsyncDynamicSession() as session:
+                    logger.info("Scraping with DynamicSession strategy")
+                    for url in urls[:self.url_nb]:
+                        page = await session.fetch(url)
+                        prop = await self.get_data(page, url)
+                        if prop is not None:
+                            self.listing.add_property(prop)
+            except Exception as e:
+                logger.error(f"Dynamic failed for scraping {url} because : {e}")
+                try:
+                    async with AsyncStealthySession() as session:
+                        logger.info("Scraping with StealthySession strategy")
+                        for url in urls[:self.url_nb]:
+                            page = await session.fetch(url)
+                            prop = await self.get_data(page, url)
+                            if prop is not None:
+                                self.listing.add_property(prop)
+                except Exception as e:
+                    self.listing.failed_urls.append(url)
+                    logger.error(f"Both sessions failed for scraping {url} because : {e}")
+        logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
     
     @abstractmethod
     async def get_data(self, page: Selector, url:str) -> Property | None:

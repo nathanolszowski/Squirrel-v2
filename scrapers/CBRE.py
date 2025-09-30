@@ -40,7 +40,7 @@ class CBREScraper(HTTPScraper):
             return False
 
 
-    def data_hook(self, property:Property, page, url: str) -> None:
+    async def data_hook(self, property:Property, page:Selector, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
@@ -50,7 +50,7 @@ class CBREScraper(HTTPScraper):
         """
         # Référence
         reference_element = page.css_first("li.LS.breadcrumb-item.active span")
-        property.reference = reference_element.text(strip=True) if reference_element else "N/A"
+        property.reference = reference_element.text if reference_element else None
 
         # Actif
         actif_map = {
@@ -59,24 +59,24 @@ class CBREScraper(HTTPScraper):
             "entrepots": "Entrepots",
             "coworking": "Bureau équipé",
         }
-        property.asset_type = next((label for key, label in actif_map.items() if key in url), "N/A")
-
+        property.asset_type = next((label for key, label in actif_map.items() if key in url), None)
+        
         # Contrat
         contrat_map = {
             "a-louer": "Location",
             "a-vendre": "Vente",
         }
-        property.contract = next((label for key, label in contrat_map.items() if key in url), "N/A")
-
+        property.contract = next((label for key, label in contrat_map.items() if key in url), None)
+        
         # URL image
         img_image = page.css_first("div.main-image img")
-        if img_image and img_image.attributes.get("src"):
-            property.url_image = img_image.attributes["src"]
+        if img_image and img_image.attrib["src"]:
+            property.url_image = img_image.attrib["src"]
 
         # Position GPS
         parent = page.css_first("a#contentHolder_streetMapLink")
         if parent:
-            href = parent.attributes.get("href", "")
+            href = parent.attrib["href"]
             if isinstance(href, str):
                 match = re.search(r"cbll=([\d\.]+),([\d\.]+)", href)
                 if match:

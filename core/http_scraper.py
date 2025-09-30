@@ -19,35 +19,6 @@ class HTTPScraper(BaseScraper):
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
         
-    async def run(self) -> None:
-        """Launch the scraper, discover url and scrape all the urls"""
-        logger.info(f"[{self.scraper_name}] is starting to scrape data")
-        urls = await self.url_discovery_strategy()
-        if not urls:
-            logger.warning("Cannot find any urls to be scraped")
-            return None
-        logger.info(f"[{self.scraper_name}] has discovered {len(urls)} urls to be scraped")
-
-        if self.url_nb is None :
-            async with AsyncDynamicSession() as session:
-                try:
-                    for url in urls:
-                        prop = await self.get_data(url)
-                        if prop is not None:
-                            self.listing.add_property(prop)
-                except Exception as e:
-                    self.listing.failed_urls.append(url)
-                
-        else:
-            for url in urls[:self.url_nb]:
-                prop = await self.get_data(url)
-                if prop is not None:
-                    self.listing.add_property(prop)
-                else:
-                    self.listing.failed_urls.append(url)
-                    continue
-        logger.info(f"[{self.scraper_name}] has finished scraping all the data : {self.listing.count_properties()}")
-        
     async def url_discovery_strategy(self) -> list[str]|None:
         """This method is used to collect the Urls to be scraped.
         It needs to be overwrite by some scrapers with non classic url discovery strategy like API and paginate URLs.
@@ -66,7 +37,7 @@ class HTTPScraper(BaseScraper):
         else:
             logger.info("Fetching urls from a single sitemap")
             urls_discovery.append(self.start_link)
-
+        
         try:
             async with AsyncDynamicSession() as session:
                 for url in urls_discovery:
@@ -102,7 +73,7 @@ class HTTPScraper(BaseScraper):
         def select_text(selector):
             if selector:
                 node = page.css_first(selector)
-                return node.text(strip=True) if node else None
+                return node.text if node else None
             return None
 
         property = Property(
@@ -128,10 +99,10 @@ class HTTPScraper(BaseScraper):
             longitude=select_text(self.selectors.get("longitude")),
             price=select_text(self.selectors.get("global_price")),
         )
-        self.data_hook(property, page, url)
+        await self.data_hook(property, page, url)
         return property
     
-    def data_hook(self, property:Property, page:Selector, url:str) -> None:
+    async def data_hook(self, property:Property, page:Selector, url:str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass"""
         pass
 
