@@ -62,15 +62,16 @@ class HTTPScraper(BaseScraper):
                 logger.warning("Both sessions failed to fetch the sitemap(s)")
                 return None
         else:
-            logger.info(f"Successfully fetched {len(responses)} sitemaps")
+            logger.info(f"Successfully fetched {len(responses)} urls from the sitemap(s)")
             return responses
         
     async def select_text(self, selector, page:Selector) -> Any|None:
         """Helper function to select text from a selector"""
-        if selector:
+        if selector is not None:
             node = page.css_first(selector)
             return node.text if node else None
-        return None
+        else:
+            return None
         
     async def get_data(self, page: Selector, url:str) -> Property | None:
         """Collect data from an HTML element

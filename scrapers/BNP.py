@@ -66,16 +66,14 @@ class BNPScraper(HTTPScraper):
         property.adress = f"{nom_immeuble} {adresse}".strip()
 
         # Image url
-        parent_image = page.css_first("div.img-container")
-        if parent_image:
-            img_image = parent_image.attrib["img"]
-            if img_image and img_image.attrib["data-lazy"]:
-                url_image = urljoin("https://www.bnppre.fr", img_image.attrib["data-lazy"])
-                property.url_image = url_image
-            else:
-                property.url_image = None
+        parent_image = page.css_first("div.img-container img")
+
+        if parent_image and parent_image.attrib["data-lazy"]:
+            url_image = urljoin("https://www.bnppre.fr", parent_image.attrib["data-lazy"])
+            property.url_image = url_image
         else:
             property.url_image = None
+
 
         # GPS
         script = page.css_first("script:contains('var geocode')")

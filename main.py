@@ -35,7 +35,7 @@ async def main():
             except Exception as e:
                 logger.error(f"Error when running the following scraper : {scraper.scraper_name} : {e}")
     exporter = ListingExporter(listing_manager)
-    exporter.export_to_json()
+    exporter.export_to_json("exports")
 
     logger.info(
         f"Program finishing properly, please check the log file {log_file} for details and the exported data in the folder exports",

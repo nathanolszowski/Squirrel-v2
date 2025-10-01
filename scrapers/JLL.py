@@ -61,3 +61,9 @@ class JLLScraper(HTTPScraper):
         property.asset_type = next(
             (label for key, label in actif_map.items() if key in url), None
         )
+        # Url image (basique)
+        parent_image = page.css_first("#__next > div > div > main > div.max-\\[50vh\\].relative.flex.h-auto.flex-col.items-center.bg-neutral-800\\/95.\\[\\&\\>img\\]\\:object-contain.md\\:\\[\\&\\>img\\]\\:object-cover > img")
+        if parent_image and parent_image.attrib["src"]:
+            property.url_image = parent_image.attrib["src"]
+        else:
+            property.url_image = None

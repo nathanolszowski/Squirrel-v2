@@ -15,7 +15,7 @@ class ScraperConf(TypedDict):
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     "BNP": {
         "scraper_name": "BNP",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": {
@@ -27,14 +27,14 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "JLL": {
         "scraper_name": "JLL",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.jll.fr/sitemap-properties.xml",
     },
     "CBRE": {
         "scraper_name": "CBRE",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
@@ -65,7 +65,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ARTHURLOYD": {
         "scraper_name": "ARTHURLOYD",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",

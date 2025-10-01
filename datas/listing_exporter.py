@@ -20,7 +20,6 @@ class ListingExporter:
             os.makedirs(path)
         now = datetime.now().strftime("%Y-%m-%d_%H-%M")
         log_file = os.path.join(path, f"{now}.json")
-        from dataclasses import asdict
         data = self.exported_listings.get_flat_dict()
         if fileobj is None:
             with open(log_file, "w", encoding="utf-8") as f:
