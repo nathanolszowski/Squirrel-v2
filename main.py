@@ -11,6 +11,7 @@ from scrapers.ARTHURLOYD import ARTHURLOYDScraper
 from scrapers.SAVILLS import SAVILLSScraper
 from scrapers.KNIGHTFRANK import KNIGHTFRANKScraper
 from scrapers.CUSHMAN import CUSHMANScraper
+from scrapers.ALEXBOLTON import ALEXBOLTONScraper
 from datas.listing_manager import ListingManager
 from datas.listing_exporter import ListingExporter
 import logging
@@ -23,7 +24,7 @@ async def main():
     logger = logging.getLogger(__name__)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    scrapers = [CBREScraper(), BNPScraper(), JLLScraper(), ARTHURLOYDScraper(), SAVILLSScraper(), KNIGHTFRANKScraper(), CUSHMANScraper()]
+    scrapers = [CBREScraper(), BNPScraper(), JLLScraper(), ARTHURLOYDScraper(), SAVILLSScraper(), KNIGHTFRANKScraper(), CUSHMANScraper(), ALEXBOLTONScraper()]
     enabled_scrapers = [scraper for scraper in scrapers if scraper.enabled]
     logger.info(f"Starting scraping for scrapers {len(enabled_scrapers)} / {len(scrapers)} enabled : {[scraper.scraper_name for scraper in enabled_scrapers]}")
     listing_manager = ListingManager()

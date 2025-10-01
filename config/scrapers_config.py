@@ -41,14 +41,14 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ALEXBOLTON": {
         "scraper_name": "ALEXBOLTON",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.alexbolton.fr/sitemap.xml",
     },
     "CUSHMAN": {
         "scraper_name": "CUSHMAN",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cushmanwakefield.fr/sitemap.xml",
