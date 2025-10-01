@@ -5,7 +5,7 @@ This module defines the Property dataclass which includes various attributes rel
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 
 @dataclass
 class Property:
@@ -13,7 +13,7 @@ class Property:
     agency:Optional[str]
     url:Optional[str]
     reference:Optional[str]
-    asset_type:Optional[str]
+    asset_type:Any
     contract:Optional[str]
     disponibility:Optional[str]
     area:Optional[str]

@@ -48,7 +48,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "CUSHMAN": {
         "scraper_name": "CUSHMAN",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cushmanwakefield.fr/sitemap.xml",
@@ -65,7 +65,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ARTHURLOYD": {
         "scraper_name": "ARTHURLOYD",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",
