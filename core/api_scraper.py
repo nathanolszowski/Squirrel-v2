@@ -14,9 +14,9 @@ class APIScraper(BaseScraper):
     
     def __init__(self, config, selectors, base_url, base_url_property, api_url):
         super().__init__(config, selectors)
-        self.base_url = base_url
-        self.base_url_property = base_url_property
-        self.api_url = api_url
+        self.base_url:str = base_url
+        self.base_url_property:str = base_url_property
+        self.api_url:str = api_url
 
     async def run(self) -> None:
         """Launch the scraper, discover url and scrape all the urls"""

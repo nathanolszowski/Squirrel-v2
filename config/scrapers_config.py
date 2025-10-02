@@ -55,7 +55,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "KNIGHTFRANK": {
         "scraper_name": "KNIGHTFRANK",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "URL",
         "start_link": {
@@ -72,7 +72,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "SAVILLS": {
         "scraper_name": "SAVILLS",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "API",
         "url_strategy": "API",
         "start_link": {
