@@ -1,12 +1,12 @@
 # Squirrel Scraper V.2
 
-This project is a collection of scrapers to extract real estate ad data from different Agency sites.
+This project is a collection of scrapers to extract real estate ad data from different french Agency sites.
 It allows you to have a complete market view for offices in Île-de-France, business premises and warehouses in France.
 List of available agency sites:
 
 - CBRE
 - BNP
-- JLL /!/ Disabled /!/
+- JLL /!/ In progress /!/
 - AlexBolton
 - Cushman & Wakefield
 - Knight Frank
@@ -16,21 +16,28 @@ List of available agency sites:
 ## Project status
 
 1. Priority 1 :
-- [x] Work on code factorization and scraping speed
-- [ ] Progress bar
-- [ ] Improve the recovery of longitude/latitude and addresses for all agencies
+
+- [ ] Improve the quality of data recovery in particular longitude/latitude and addresses for all agencies (asset_type for arthur loyd, resume for alexbolton)
 - [ ] Homogenize data collection
+- [ ] Working on filters rationalisation (in particular JLL)
+- [x] Working on asynchronous programing
+
+2. Priority 2 :
+- [ ] Deduplicate the request logic
+- [ ] Improve scraper heritage
+- [ ] Improve descovery strategy
+- [ ] Adding a scraping limitation for APIScraper
+- [ ] Cache system to avoid re-scraping the same pages too often?
+- [ ] Identification of too large number of None values (css selector validation)
 - [ ] Manage duplicates :
    - compare lat/long, adresse, accroche, titre et surface totale
 
-2. Priority 2 :
-- [ ] Cache system to avoid re-scraping the same pages too often?
-- [ ] Identification of too large number of None values
-
 3. Priority 3 :
 - [ ] Addition of market sectors
+- [ ] Progress bar
 - [ ] Compare the new export with the old one
 - [ ] Natural language processing for resume and amenities (with IA if possible)
+- [ ] Visualisation and exploration
 
 
 
@@ -58,13 +65,11 @@ Squirrel-v2/
 ├── exports/
 ├── logs/
 ├── network/
-│   ├── client_handler.py     # Client handler for web scraping requests
 │   └── user_agent.py         # User-agents generator
 ├── tests/
 │   ├── datas/
 │   |    └── test_properties.py
 │   └── network/
-│       ├──test_client_handler.py
 │       └── test_user_agents.py
 ├── utils/
 │   └── logging.py        # Initialisation du logger (create a log file in logs/ folder)
@@ -93,10 +98,14 @@ PROXY = "YOUR PROXY ADRESS"
 
 ## Usage
 
+/!/ By default all scrapers are enabled. In order to disabled one or several scrapers, go to the config/scrapers_config and set the "enabled" to False /!/
+
 Starting program with :
 ```bash
 python main.py
 ```
+
+## Default return format
 
 JSON Format :
 ```
@@ -129,14 +138,14 @@ JSON Format :
 - Asynchronous scraping
 - Detailed logging
 - User-agent management
-- Use of proxy
+- Proxy handling
 
-## Add a new scraper
+## Add a new HTTP scraper
 
-1. Create a new file in `scrapers/`
+1. Create a new python file in `scrapers/`
 2. Inherits from `BaseScraper`
 3. Implement `post_traitement_hook()` and `instance_filter_url()` method if needed
-4. Add selectors in `config/scrapers_selectors.py`
+4. Add all selectors in `config/scrapers_selectors.py`
 5. Feel the config for the scraper at `config/scrapers_config.py`
 6. Instance the scraper in `main.py`
 
@@ -144,7 +153,8 @@ JSON Format :
 
 - CSS selectors are centralised in `config/scrapers_selectors.py`
 - Global configuration in `config/squirrel_settings.py`
-- Tests are centralised in `tests/`
+- Scraper configuration in `config/scrapers_config.py`
+- Tests are centralised and classified in `tests/`
 - Logs allow you to monitor execution and diagnose errors
 
 ## Error handling
