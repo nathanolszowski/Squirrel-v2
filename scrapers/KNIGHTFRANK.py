@@ -46,15 +46,15 @@ class KNIGHTFRANKScraper(HTTPScraper):
         # Asset type
         property.asset_type = "Bureaux"
 
-        # Surcharger la méthode obtenir l'url image
+        # Url image
         parent_image = page.css_first("div.col-xl-8 p-0 bg-dark photoUne img")
         if parent_image and parent_image.attrib["src"] :
             property.url_image = parent_image.attrib["src"] 
-        """
+
         # Surcharger la méthode obtenir la position
         scripts = page.css("script")
         for script in scripts:
-            script_text = script.text()
+            script_text = script.text
             if script_text and "initMap" in script_text:  # Filtrer le script contenant initMap
                 lat_match = re.search(r"lat\s*:\s*([0-9\.\-]+)", script_text)
                 lng_match = re.search(r"lng\s*:\s*([0-9\.\-]+)", script_text)
@@ -69,7 +69,7 @@ class KNIGHTFRANKScraper(HTTPScraper):
             else:
                 property.latitude = 48.866669
                 property.longitude = 2.33333
-        """       
+     
     async def _trouver_formater_urls_offres(self, page: Selector) -> list[str]|None:
         """Méthode qui permet de formater les urls KnightFrank lors de la méthode _navigation_page()
 
