@@ -41,7 +41,7 @@ class KNIGHTFRANKScraper(HTTPScraper):
             "vente": "Vente",
         }
         property.contract = next(
-            (label for key, label in contrat_map.items() if key in url), "N/A"
+            (label for key, label in contrat_map.items() if key in url), None
         )
         # Asset type
         property.asset_type = "Bureaux"
@@ -50,6 +50,7 @@ class KNIGHTFRANKScraper(HTTPScraper):
         parent_image = page.css_first("div.col-xl-8 p-0 bg-dark photoUne img")
         if parent_image and parent_image.attrib["src"] :
             property.url_image = parent_image.attrib["src"] 
+        """
         # Surcharger la méthode obtenir la position
         scripts = page.css("script")
         for script in scripts:
@@ -68,8 +69,8 @@ class KNIGHTFRANKScraper(HTTPScraper):
             else:
                 property.latitude = 48.866669
                 property.longitude = 2.33333
-                    
-    async def _trouver_formater_urls_offres(self, page: Selector) -> list[str]:
+        """       
+    async def _trouver_formater_urls_offres(self, page: Selector) -> list[str]|None:
         """Méthode qui permet de formater les urls KnightFrank lors de la méthode _navigation_page()
 
         Args:
@@ -81,7 +82,7 @@ class KNIGHTFRANKScraper(HTTPScraper):
         div_parent = page.css_first("#listCards > div")
         if not div_parent:
             logger.info("Pas d'élément listCards trouvé")
-            return []
+            return None
         else:
             offres = div_parent.css("div[class*='cardOffreListe']")
             liens = [offre.css_first("a.infosCard") for offre in offres if offre.css_first("a.infosCard")]
@@ -92,37 +93,31 @@ class KNIGHTFRANKScraper(HTTPScraper):
             ]
             return hrefs
 
-    async def _navigation_page(self, url: str|None) -> list[str]|None:
+    async def _navigation_page(self, page:Selector, url: str|None) -> list[str]|None:
         """Permet de naviguer entre les différentes pages d'offres
 
         Args:
             url (str): Représente la page HTML dans laquelle naviguer
 
         Returns:
-            urls (list[str]): Représente la liste d'urls des offres à scraper
+            url (str): Représente la page HTML dans laquelle naviguer
         """
-        urls = []
-        logger.info("Navigate through the pages to fetch all the offers urls")
-        while url:
-            logger.info(f"Fetching offers from page: {url}")
-            
-            urls += await self._trouver_formater_urls_offres()
+        next_page_url = url
+        div_parent_page = page.css_first(
+            "body > main > section > div.container.pagination.py-5 > div"
+        )
 
-            div_parent_page = page.css_first(
-                "body > main > section > div.container.pagination.py-5 > div"
-            )
-
-            if div_parent_page:
-                # Sélectionne tous les liens avec aria-label="Next"
-                suivant = div_parent_page.css("a[aria-label='Next']")
-                if suivant:
-                    href = suivant[0].attrib["href"]
-                    url = self.base_url + href
-                else:
-                    url = None
+        if div_parent_page:
+            # Sélectionne tous les liens avec aria-label="Next"
+            suivant = div_parent_page.css("a[aria-label='Next']")
+            if suivant:
+                href = suivant[0].attrib["href"]
+                next_page_url = self.base_url + href
             else:
-                url = None
-        return urls
+                next_page_url = None
+        else:
+            next_page_url = None
+        return next_page_url
 
     async def url_discovery_strategy(self) -> list[str]|None:
         """
@@ -132,8 +127,8 @@ class KNIGHTFRANKScraper(HTTPScraper):
             list[str]|None: Represents list of urls to scrape or None if the program can't reach the start_link.
         """
         logger.info("Fetch urls from html page(s)")
-        responses = []
-        urls_discovery = []
+        responses:list[str] = []
+        urls_discovery:list[str] = []
 
         if isinstance(self.start_link, dict):
             logger.info("Fetching urls from multiple HTML pages")
@@ -144,13 +139,33 @@ class KNIGHTFRANKScraper(HTTPScraper):
             logger.info("Fetching urls from a single HTML page")
             urls_discovery.append(self.start_link)
 
-        for url in urls_discovery:
-            response = await self._navigation_page(url)
-            responses = response if response else []
-        
-        if responses:
-            logger.info(f"{len(responses)} urls fetched from html page(s)")
+        if urls_discovery:
+            for discover_url in urls_discovery:
+                while discover_url and isinstance(discover_url, str):
+                    logger.info(f"Fetching offers from page: {discover_url}")
+                    try:
+                        async with AsyncDynamicSession() as session:
+                            page = await session.fetch(discover_url)
+                    except Exception as e:
+                        logger.error(f"AsyncDynamicSession failed: {e}")
+                        try:
+                            async with AsyncStealthySession() as session:
+                                page = await session.fetch(discover_url)
+                        except Exception as e:
+                            logger.error(f"AsyncStealthySession failed: {e}")
+                            logger.warning("Both sessions failed to fetch the page")
+                            return None
+                    else:
+                        urls_page = await self._trouver_formater_urls_offres(page)
+                        if not urls_page:
+                            logger.info(f"No urls found on this page {discover_url}")
+                        else:
+                            for formated_url in urls_page:
+                                if self.filter_url(formated_url):
+                                    responses.append(formated_url)
+                            discover_url = await self._navigation_page(page, discover_url)
             return responses
         else:
-            logger.error("No url fetched from html page(s)")
+            logger.warning(f"[{self.scraper_name}]No start_link(s) provided for URL discovery")
             return None
+                        

@@ -9,7 +9,7 @@ class ScraperConf(TypedDict):
     enabled:bool
     scraper_type:str
     url_strategy:str
-    start_link:str|dict
+    start_link:str|dict[str, str]
 
 
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
