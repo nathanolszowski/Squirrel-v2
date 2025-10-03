@@ -28,7 +28,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "CBRE": {
         "scraper_name": "CBRE",
-        "enabled": False,
+        "enabled": True,
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
     },
     "ALEXBOLTON": {

@@ -30,7 +30,7 @@ class CBREScraper(VanillaScraper):
 
         match = pattern.match(url)
         if match:
-            department_code = match.group(3)
+            department_code = match.group(3)[:2]
             if department_code in DEPARTMENTS:
                 return True
             else:
