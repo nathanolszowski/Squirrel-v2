@@ -30,7 +30,7 @@ class CBREScraper(HTTPScraper):
 
         match = pattern.match(url)
         if match:
-            department_code = match.group(3)[:2]
+            department_code = match.group(3)
             if department_code in DEPARTMENTS:
                 return True
             else:

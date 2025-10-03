@@ -7,6 +7,7 @@ import logging
 from core.http_scraper import HTTPScraper
 from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
+from config.squirrel_settings import DEPARTMENTS
 from config.scrapers_selectors import SELECTORS
 from datas.property import Property
 
@@ -22,7 +23,7 @@ class ALEXBOLTONScraper(HTTPScraper):
         """Overwrite to add a url filter at the instance level"""
         if url.startswith(
             "https://www.alexbolton.fr/annonces/"
-        ):
+        ) and any(departement in url for departement in DEPARTMENTS):
             return True
         else:
             return False

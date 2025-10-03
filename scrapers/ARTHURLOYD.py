@@ -11,6 +11,7 @@ import html
 from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
+from config.squirrel_settings import DEPARTMENTS
 from datas.property import Property
 
 logger = logging.getLogger(__name__)
@@ -24,14 +25,14 @@ class ARTHURLOYDScraper(HTTPScraper):
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
         motifs_url = [
-            "bureau-location/ile-de-france/",
-            "bureau-vente/ile-de-france/",
+            "bureau-location/",
+            "bureau-vente/",
             "locaux-activite-entrepots-location/",
             "locaux-activite-entrepots-vente/",
             "logistique-location/",
             "logistique-vente/",
         ]
-        if any(motif in url for motif in motifs_url):
+        if any(motif in url for motif in motifs_url) and any(departement in url for departement in DEPARTMENTS):
             return True
         else:
             return False

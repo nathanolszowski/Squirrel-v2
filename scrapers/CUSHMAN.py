@@ -26,7 +26,7 @@ class CUSHMANScraper(HTTPScraper):
         """Overwrite to add a url filter at the instance level"""
         pattern = re.compile(
             r"-\d{5}-\d+[a-zA-Z]*$"
-        )  # Suffixe de type "-75009-139113AB"
+        )  # chain format "-75009-139113AB"
         if pattern.search(url):
             if "bureaux" in url:
                 last_segment = url.strip("/").split("/")[-1]

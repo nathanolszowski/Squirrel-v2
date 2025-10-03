@@ -68,63 +68,66 @@ class SAVILLSScraper(APIScraper):
                         ) 
                         
                         for offre in offres:
-                            size_desc = offre.get("SizeDescription", "") or ""
-                            contrat_map = {"louer": "Location", "vendre": "Vente"}
-                            contrat = next(
-                                (label for key, label in contrat_map.items() if key in size_desc.lower()),
-                                None,
-                            )
-                            # Type d'actif
-                            actif = (
-                                offre.get("PropertyTypes", [{}])[0].get("Caption", "")
-                                if isinstance(offre.get("PropertyTypes"), list)
-                                and offre.get("PropertyTypes")
-                                else None
-                            )
-                            if actif == "Entrepôts / Locaux d'activité":
-                                for surface in offre.get("ByUnit") or []:
-                                    type_surface = surface.get("Type")
-                                    if type_surface in {"Activités", "Entrepôts"}:
-                                        actif = type_surface
-                                        break
-
-                            property = Property(
-                                agency=self.scraper_name,
-                                url=self.base_url_property
-                                + (offre.get("ExternalPropertyIDFormatted", "") or ""),
-                                reference=offre.get("ExternalPropertyIDFormatted", "") or "",
-                                asset_type=actif,
-                                contract=contrat,
-                                disponibility=(
-                                    (offre.get("ByUnit") or [{}])[0].get("Disponibilité", "")
-                                    if isinstance(offre.get("ByUnit"), list)
-                                    and len(offre.get("ByUnit")) > 0
-                                    else ""
-                                ),
-                                area=offre.get("SizeFormatted", "") or None,
-                                division=None,
-                                adress=offre.get("AddressLine2", "") or None,
-                                postal_code=None,
-                                contact=(offre.get("PrimaryAgent", {}) or {}).get("AgentName", "") or "",
-                                resume=offre.get("Description", "") or "",
-                                amenities=(
-                                    (offre.get("LongDescription") or [{}])[0].get("Body", "")
-                                    if isinstance(offre.get("LongDescription"), list)
-                                    and len(offre.get("LongDescription")) > 0
+                            offer_url = self.base_url_property + (offre.get("ExternalPropertyIDFormatted", "") or "")
+                            if self.instance_url_filter(offer_url):
+                                size_desc = offre.get("SizeDescription", "") or ""
+                                contrat_map = {"louer": "Location", "vendre": "Vente"}
+                                contrat = next(
+                                    (label for key, label in contrat_map.items() if key in size_desc.lower()),
+                                    None,
+                                )
+                                # Type d'actif
+                                actif = (
+                                    offre.get("PropertyTypes", [{}])[0].get("Caption", "")
+                                    if isinstance(offre.get("PropertyTypes"), list)
+                                    and offre.get("PropertyTypes")
                                     else None
-                                ),
-                                url_image=(
-                                    (offre.get("ImagesGallery") or [{}])[0].get("ImageUrl_L")
-                                    if isinstance(offre.get("ImagesGallery"), list)
-                                    and len(offre.get("ImagesGallery")) > 0
-                                    else None
-                                ),
-                                latitude=offre.get("Latitude", "") or None,
-                                longitude=offre.get("Longitude", "") or None,
-                                price=offre.get("DisplayPriceText", "") or None,
-                            )
+                                )
+                                if actif == "Entrepôts / Locaux d'activité":
+                                    for surface in offre.get("ByUnit") or []:
+                                        type_surface = surface.get("Type")
+                                        if type_surface in {"Activités", "Entrepôts"}:
+                                            actif = type_surface
+                                            break
 
-                            self.listing.add_property(property)
+                                property = Property(
+                                    agency=self.scraper_name,
+                                    url=offer_url,
+                                    reference=offre.get("ExternalPropertyIDFormatted", "") or "",
+                                    asset_type=actif,
+                                    contract=contrat,
+                                    disponibility=(
+                                        (offre.get("ByUnit") or [{}])[0].get("Disponibilité", "")
+                                        if isinstance(offre.get("ByUnit"), list)
+                                        and len(offre.get("ByUnit")) > 0
+                                        else ""
+                                    ),
+                                    area=offre.get("SizeFormatted", "") or None,
+                                    division=None,
+                                    adress=offre.get("AddressLine2", "") or None,
+                                    postal_code=None,
+                                    contact=(offre.get("PrimaryAgent", {}) or {}).get("AgentName", "") or "",
+                                    resume=offre.get("Description", "") or "",
+                                    amenities=(
+                                        (offre.get("LongDescription") or [{}])[0].get("Body", "")
+                                        if isinstance(offre.get("LongDescription"), list)
+                                        and len(offre.get("LongDescription")) > 0
+                                        else None
+                                    ),
+                                    url_image=(
+                                        (offre.get("ImagesGallery") or [{}])[0].get("ImageUrl_L")
+                                        if isinstance(offre.get("ImagesGallery"), list)
+                                        and len(offre.get("ImagesGallery")) > 0
+                                        else None
+                                    ),
+                                    latitude=offre.get("Latitude", "") or None,
+                                    longitude=offre.get("Longitude", "") or None,
+                                    price=offre.get("DisplayPriceText", "") or None,
+                                )
+
+                                self.listing.add_property(property)
+                            else:
+                                pass
 
                         # Nombre de pages
                         paging_info = (
@@ -160,7 +163,10 @@ class SAVILLSScraper(APIScraper):
 
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
-        return True
+        if any(departement in url for departement in DEPARTMENTS):
+            return True
+        else:
+            return False
 
     async def data_hook(self, property:Property, page, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass

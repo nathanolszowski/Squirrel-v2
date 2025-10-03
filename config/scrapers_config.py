@@ -41,7 +41,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ALEXBOLTON": {
         "scraper_name": "ALEXBOLTON",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.alexbolton.fr/sitemap.xml",
@@ -65,7 +65,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ARTHURLOYD": {
         "scraper_name": "ARTHURLOYD",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",
