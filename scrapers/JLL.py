@@ -8,7 +8,7 @@ from scrapling import Selector
 from core.http_scraper import HTTPScraper
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
-from config.squirrel_settings import DEPARTMENTS_IDF
+from config.squirrel_settings import DEPARTMENTS
 from datas.property import Property
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class JLLScraper(HTTPScraper):
                 last_segment = url.strip("/").split("/")[-1]
                 part = last_segment.split("-")
                 part = part[-2]
-                if any(departement in part for departement in DEPARTMENTS_IDF):
+                if any(departement in part for departement in DEPARTMENTS):
                     return True
                 else:
                     return False

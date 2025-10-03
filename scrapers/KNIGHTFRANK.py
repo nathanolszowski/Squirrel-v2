@@ -11,7 +11,7 @@ from scrapling.fetchers import AsyncStealthySession, AsyncDynamicSession
 import re
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
-from config.squirrel_settings import DEPARTMENTS_IDF
+from config.squirrel_settings import DEPARTMENTS
 from datas.property import Property
 
 logger = logging.getLogger(__name__)

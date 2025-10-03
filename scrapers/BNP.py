@@ -11,7 +11,7 @@ import json
 import re
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
-from config.squirrel_settings import DEPARTMENTS_IDF
+from config.squirrel_settings import DEPARTMENTS
 from datas.property import Property
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class BNPScraper(HTTPScraper):
     def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
         if "bureau" in url:
-            if any(f"-{departement}/" in url for departement in DEPARTMENTS_IDF):
+            if any(f"-{departement}/" in url for departement in DEPARTMENTS):
                 return True
             else:
                 return False

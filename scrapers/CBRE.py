@@ -9,7 +9,7 @@ from core.http_scraper import HTTPScraper
 from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
-from config.squirrel_settings import DEPARTMENTS_IDF
+from config.squirrel_settings import DEPARTMENTS
 from datas.property import Property
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class CBREScraper(HTTPScraper):
         match = pattern.match(url)
         if match:
             department_code = match.group(3)[:2]
-            if department_code in DEPARTMENTS_IDF:
+            if department_code in DEPARTMENTS:
                 return True
             else:
                 return False

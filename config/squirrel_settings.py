@@ -16,4 +16,4 @@ USER_AGENT_UPDATE = False
 # Cache path for user-agents
 FICHIER_CACHE_USER_AGENT = "user_agent.json"
 
-DEPARTMENTS_IDF = ["75", "77", "78", "91", "92", "93", "94", "95"]
+DEPARTMENTS = ["75", "77", "78", "91", "92", "93", "94", "95"]

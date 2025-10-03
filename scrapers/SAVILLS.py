@@ -11,7 +11,7 @@ from urllib.parse import urlsplit, urlencode, parse_qsl, urlunsplit
 from scrapling.fetchers import FetcherSession
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
-from config.squirrel_settings import DEPARTMENTS_IDF, PROXY, SIMPLE_TIMEOUT
+from config.squirrel_settings import DEPARTMENTS, PROXY, SIMPLE_TIMEOUT
 from datas.property import Property
 
 logger = logging.getLogger(__name__)
