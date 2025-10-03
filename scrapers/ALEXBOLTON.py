@@ -4,7 +4,7 @@ Scraper for ALEXBOLTON
 """
 
 import logging
-from core.http_scraper import HTTPScraper
+from core.http_scraper import VanillaScraper
 from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.squirrel_settings import DEPARTMENTS
@@ -13,7 +13,7 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class ALEXBOLTONScraper(HTTPScraper):
+class ALEXBOLTONScraper(VanillaScraper):
     """ALEXBOLTON scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):

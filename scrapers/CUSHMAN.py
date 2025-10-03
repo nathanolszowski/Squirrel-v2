@@ -4,7 +4,7 @@ Scraper for CUSHMAN & WAKEFIELD
 """
 
 import logging
-from core.http_scraper import HTTPScraper
+from core.http_scraper import VanillaScraper
 from scrapling import Selector
 import re
 import html
@@ -16,7 +16,7 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class CUSHMANScraper(HTTPScraper):
+class CUSHMANScraper(VanillaScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):

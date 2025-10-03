@@ -5,7 +5,7 @@ HTTP Scraper module.
 
 from core.base_scraper import BaseScraper
 import logging
-from config.squirrel_settings import PROXY
+from config.squirrel_settings import PROXY, ADVANCED_TIMEOUT
 from typing import Any
 from scrapling.fetchers import AsyncStealthySession, AsyncDynamicSession
 from scrapling import Selector
@@ -15,7 +15,7 @@ from config.scrapers_config import ScraperConf
 
 logger = logging.getLogger(__name__)
 
-class HTTPScraper(BaseScraper):
+class VanillaScraper(BaseScraper):
     
     def __init__(self, config: ScraperConf, selectors:SelectorFields):
         super().__init__(config, selectors)
@@ -40,7 +40,7 @@ class HTTPScraper(BaseScraper):
             urls_discovery.append(self.start_link)
         
         try:
-            async with AsyncDynamicSession() as session:
+            async with AsyncDynamicSession(proxy=PROXY) as session:
                 for url in urls_discovery:
                     page = await session.fetch(url)
                     response = page.xpath('//url/loc/text()')
@@ -50,7 +50,7 @@ class HTTPScraper(BaseScraper):
         except Exception as e:
             logger.error(f"AsyncDynamicSession failed: {e}")
             try:
-                async with AsyncStealthySession() as session:
+                async with AsyncStealthySession(timeout=ADVANCED_TIMEOUT, proxy=PROXY, geoip=True, solve_cloudflare=True, disable_ads=True, disable_resources=True, block_webrtc=True, block_images=True, os_randomize=True) as session:
                     for url in urls_discovery:
                         page = await session.fetch(url)
                         response = page.xpath('//url/loc/text()')

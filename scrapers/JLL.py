@@ -5,7 +5,7 @@ Scraper for CBRE
 
 import logging
 from scrapling import Selector
-from core.http_scraper import HTTPScraper
+from core.http_scraper import VanillaScraper
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
 from config.squirrel_settings import DEPARTMENTS
@@ -13,7 +13,7 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class JLLScraper(HTTPScraper):
+class JLLScraper(VanillaScraper):
     """JLL scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):

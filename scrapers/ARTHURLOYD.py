@@ -4,7 +4,7 @@ Scraper for ARTHURLOYD
 """
 
 import logging
-from core.http_scraper import HTTPScraper
+from core.http_scraper import VanillaScraper
 from urllib.parse import urljoin
 import json
 import html
@@ -16,7 +16,7 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class ARTHURLOYDScraper(HTTPScraper):
+class ARTHURLOYDScraper(VanillaScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):

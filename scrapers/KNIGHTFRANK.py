@@ -4,7 +4,7 @@ Scraper for KNIGHT FRANK
 """
 
 import logging
-from core.http_scraper import HTTPScraper
+from core.http_scraper import VanillaScraper
 from scrapling import Selector
 import re
 from config.scrapers_config import SCRAPER_CONFIG
@@ -14,7 +14,7 @@ from datas.property import Property
 
 logger = logging.getLogger(__name__)
 
-class KNIGHTFRANKScraper(HTTPScraper):
+class KNIGHTFRANKScraper(VanillaScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
