@@ -9,7 +9,7 @@ import asyncio
 import inspect
 from scrapling import Selector
 from scrapling.fetchers import FetcherSession, AsyncStealthySession, AsyncDynamicSession
-from config.squirrel_settings import PROXY, SIMPLE_TIMEOUT, ADVANCED_TIMEOUT
+from config.squirrel_settings import PROXY, SIMPLE_TIMEOUT, ADVANCED_TIMEOUT, URL_PARSER_LIMITATION
 from config.scrapers_config import ScraperConf
 from datas.property_listing import PropertyListing
 from datas.property import Property
@@ -27,7 +27,7 @@ class BaseScraper(ABC):
         Args:
             config (ScraperConf): Represents a configuration for a scraper with its details
         """
-        self.url_nb:None|int = 5 # used to limit the number of URLs to be scraped
+        self.url_nb:None|int = URL_PARSER_LIMITATION # used to limit the number of URLs to be parsed
         self.scraper_name = config.get("scraper_name")
         self.enabled = config.get("enabled")
         self.crawler_strategy = config.get("scraper_type")
