@@ -28,13 +28,16 @@ async def main():
     enabled_scrapers = [scraper for scraper in scrapers if scraper.enabled]
     logger.info(f"Starting scraping for scrapers {len(enabled_scrapers)} / {len(scrapers)} enabled : {[scraper.scraper_name for scraper in enabled_scrapers]}")
     listing_manager = ListingManager()
-    for scraper in enabled_scrapers:
-            try:
-                logger.info(f"Starting scraping for {scraper.scraper_name} ...")
-                await scraper.run()
+    try:
+        tasks = [scraper.run() for scraper in enabled_scrapers]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for scraper, result in zip(enabled_scrapers, results):
+            if isinstance(result, Exception):
+                logger.error(f"Error when running the following scraper : {scraper.scraper_name} : {result}")
+            else:
                 listing_manager.add_listing(scraper.listing)
-            except Exception as e:
-                logger.error(f"Error when running the following scraper : {scraper.scraper_name} : {e}")
+    except Exception as e:
+        logger.error(f"Error when running scrapers : {e}")
     exporter = ListingExporter(listing_manager)
     exporter.export_to_json("exports")
 
