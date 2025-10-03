@@ -9,7 +9,7 @@ class ScraperConf(TypedDict):
     enabled:bool
     scraper_type:str
     url_strategy:str
-    start_link:str|dict
+    start_link:str|dict[str, str]
 
 
 SCRAPER_CONFIG: Dict[str, ScraperConf] = {
@@ -28,23 +28,23 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     "JLL": {
         "scraper_name": "JLL",
         "enabled": False,
-        "scraper_type": "PLAYWRIGHT",
+        "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.jll.fr/sitemap-properties.xml",
     },
     "CBRE": {
         "scraper_name": "CBRE",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://immobilier.cbre.fr/sitemap.xml",
     },
     "ALEXBOLTON": {
         "scraper_name": "ALEXBOLTON",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
-        "start_link": "https://immobilier.cbre.fr/sitemap.xml",
+        "start_link": "https://www.alexbolton.fr/sitemap.xml",
     },
     "CUSHMAN": {
         "scraper_name": "CUSHMAN",

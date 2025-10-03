@@ -5,53 +5,51 @@ Scraper for CBRE
 
 import logging
 import re
-from core.http_scraper import VanillaHTTP
+from core.http_scraper import HTTPScraper
+from scrapling import Selector
 from config.scrapers_config import SCRAPER_CONFIG
 from config.scrapers_selectors import SELECTORS
 from config.squirrel_settings import DEPARTMENTS_IDF
 from datas.property import Property
-from selectolax.parser import HTMLParser
 
 logger = logging.getLogger(__name__)
 
-class CBREScraper(VanillaHTTP):
+class CBREScraper(HTTPScraper):
     """CBRE scraper which inherits from VanillaHTTP class"""
 
     def __init__(self):
         super().__init__(SCRAPER_CONFIG["CBRE"], SELECTORS["CBRE"])
 
-    def instance_url_filter(self, url:str) -> bool:
+    def instance_url_filter(self, url:str|Selector) -> bool:
         """Overwrite to add a url filter at the instance level"""
         pattern = re.compile(
             r"https://immobilier\.cbre\.fr/offre/(a-louer|a-vendre)/(bureaux|coworking)/(\d+)"
         )
-
         if not url.startswith("https://immobilier.cbre.fr/offre/"):
             return False
 
-        if "bureaux" in url:
-            match = pattern.match(url)
-            if match:
-                department_code = match.group(3)[:2]
-                if department_code in DEPARTMENTS_IDF:
-                    return True
-                else:
-                    return False
+        match = pattern.match(url)
+        if match:
+            department_code = match.group(3)[:2]
+            if department_code in DEPARTMENTS_IDF:
+                return True
             else:
                 return False
-        return False
+        else:
+            return False
 
-    def data_hook(self, property:Property, page: HTMLParser, url: str) -> None:
+
+    async def data_hook(self, property:Property, page:Selector, url: str) -> None:
         """Post-processing hook method to be overwritten if necessary for specific datas in the Property dataclass
 
         Args:
-            data (dict[str]): Représente les données de l'offre à scraper
-            soup (BeautifulSoup): Représente le parser lié à la page html de l'offre à scraper
-            url (str): Représente l'url de l'offre à scraper
+            property (Property): Represent the data of the property to scrape
+            page (Selector): Selector linked to the html page of the property to scrape
+            url (str): Url of the property to scrape
         """
         # Référence
         reference_element = page.css_first("li.LS.breadcrumb-item.active span")
-        property.reference = reference_element.text(strip=True) if reference_element else "N/A"
+        property.reference = reference_element.text if reference_element else None
 
         # Actif
         actif_map = {
@@ -60,24 +58,24 @@ class CBREScraper(VanillaHTTP):
             "entrepots": "Entrepots",
             "coworking": "Bureau équipé",
         }
-        property.asset_type = next((label for key, label in actif_map.items() if key in url), "N/A")
-
+        property.asset_type = next((label for key, label in actif_map.items() if key in url), None)
+        
         # Contrat
         contrat_map = {
             "a-louer": "Location",
             "a-vendre": "Vente",
         }
-        property.contract = next((label for key, label in contrat_map.items() if key in url), "N/A")
-
+        property.contract = next((label for key, label in contrat_map.items() if key in url), None)
+        
         # URL image
         img_image = page.css_first("div.main-image img")
-        if img_image and img_image.attributes.get("src"):
-            property.url_image = img_image.attributes["src"]
+        if img_image and img_image.attrib["src"]:
+            property.url_image = img_image.attrib["src"]
 
         # Position GPS
         parent = page.css_first("a#contentHolder_streetMapLink")
         if parent:
-            href = parent.attributes.get("href", "")
+            href = parent.attrib["href"]
             if isinstance(href, str):
                 match = re.search(r"cbll=([\d\.]+),([\d\.]+)", href)
                 if match:

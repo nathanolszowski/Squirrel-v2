@@ -4,14 +4,11 @@ Script global variables settings
 """
 
 # Proxy URL
-PROXY = "http://zfqxbelefdh8k61-country-fr:vkfspx2ez8cjy7c@rp.scrapegw.com:6060"
+PROXY = ""
 
 # Timeouts
-HTTP_TIMEOUT = 10  # seconds
-PLAYWRIGHT_WAIT_TIME = 15  # seconds
-
-# Playwright configuration
-CAMOUFOX = False
+SIMPLE_TIMEOUT = 1000  # milliseconds
+ADVANCED_TIMEOUT = 2000  # milliseconds
 
 # Updating user_agents list or not
 USER_AGENT_UPDATE = False
