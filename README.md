@@ -17,7 +17,7 @@ List of available agency sites:
 
 1. Priority 1 :
 
-- [ ] Improve the quality of data recovery in particular longitude/latitude and addresses for all agencies (asset_type for arthur loyd, resume for alexbolton)
+- [ ] Improve the quality of data recovery (in particular longitude/latitude and addresses for all agencies)
 - [ ] Homogenize data collection
 - [ ] Working on filters rationalisation (in particular JLL)
 - [x] Working on asynchronous programing

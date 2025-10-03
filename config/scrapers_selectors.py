@@ -89,7 +89,7 @@ SELECTORS: Dict[str, SelectorFields] = {
         "building_name": "body > section.listing-header.py-md-4 > div > div > div.col-lg-5.position-relative > div > h1",
         "resume": None,
         "contact": "body > section.listing-details.bolton-bg-grey.u-py-80.u-py-mobile-24 > div > div > div.col-lg-4.position-relative > div > h3",
-        "amenities": "body > section.listing-details.bolton-bg-grey.u-py-80.u-py-mobile-24 > div > div > div.col-lg-8 > div.d-flex > div > div.listing-details-description.mb-3",
+        "amenities": None,
         "url_image": None,
         "latitude": None,
         "longitude": None,
@@ -102,7 +102,7 @@ SELECTORS: Dict[str, SelectorFields] = {
         "contract": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > p.c-property__category",
         "disponibility": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(3) > p:nth-child(3) > span.u-t--tertiary",
         "area": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(3) > p:nth-child(1) > span.u-t--tertiary",
-        "division": "None",
+        "division": None,
         "adress": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > header > h1",
         # On peut utiliser le span pour séparer nom et prénom
         "contact": "#js-page > div.c-page__inner > main > div.o-container > article > div.o-grid.u-fxd\\(column\\)\\@phone.u-fxw\\(nowrap\\)\\@phone > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(4) > div > div > div.c-contact__main > h5",

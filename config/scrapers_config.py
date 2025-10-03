@@ -41,7 +41,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "ALEXBOLTON": {
         "scraper_name": "ALEXBOLTON",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.alexbolton.fr/sitemap.xml",
@@ -72,7 +72,7 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "SAVILLS": {
         "scraper_name": "SAVILLS",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "API",
         "url_strategy": "API",
         "start_link": {
