@@ -55,17 +55,14 @@ SCRAPER_CONFIG: Dict[str, ScraperConf] = {
     },
     "KNIGHTFRANK": {
         "scraper_name": "KNIGHTFRANK",
-        "enabled": False,
+        "enabled": True,
         "scraper_type": "HTTP",
-        "url_strategy": "URL",
-        "start_link": {
-            "Location": "https://www.knightfrank.fr/resultat?nature=1&localisation=75%7C77%7C78%7C91%7C92%7C93%7C94%7C95%7C&typeOffre=1",
-            "Vente": "https://www.knightfrank.fr/resultat?nature=2&localisation=75%7C77%7C78%7C91%7C92%7C93%7C94%7C95%7C&typeOffre=1",
-        },
+        "url_strategy": "XML",
+        "start_link": "https://www.knightfrank.fr/sitemap.xml"
     },
     "ARTHURLOYD": {
         "scraper_name": "ARTHURLOYD",
-        "enabled": True,
+        "enabled": False,
         "scraper_type": "HTTP",
         "url_strategy": "XML",
         "start_link": "https://www.arthur-loyd.com/sitemap-offer.xml",
