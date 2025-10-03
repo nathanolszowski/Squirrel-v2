@@ -51,20 +51,26 @@ class ALEXBOLTONScraper(HTTPScraper):
             ),
             None,
         )
-        """
         # Resume
         accroche_div = page.css_first("div.col-lg-5.position-relative")
 
         if accroche_div:
             paragraphs = accroche_div.css("p")
-
-            if len(paragraphs) > 8:
-                property.resume = paragraphs[8].text().strip()
-            else:
-                property.resume = None
+            for paragraph in paragraphs:  
+                if len(paragraph.text) > 30:
+                    property.resume = paragraph.text
+                else:
+                    property.resume = None
         else:
             property.resume = None
-        """
+        # Amenities
+        amenities_div = page.css_first("div.listing-details-description.mb-3")
+        amenities_list = amenities_div.css("p::text")
+        if amenities_div:
+            property.amenities = amenities_list
+        else:
+            property.amenities = None
+            
         # Image url
         img = page.css_first("img.listing-header-photo-img.u-z-index-1.d-md-none")
 
