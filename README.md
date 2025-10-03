@@ -6,10 +6,10 @@ List of available agency sites:
 
 - CBRE
 - BNP
-- JLL /!/ In progress /!/
+- JLL 
 - AlexBolton
 - Cushman & Wakefield
-- Knight Frank
+- Knight Frank /!/ Filters on url level doesn't work /!/
 - ArthurLoyd
 - Savills
 
@@ -18,8 +18,8 @@ List of available agency sites:
 1. Priority 1 :
 
 - [ ] Improve the quality of data recovery (in particular longitude/latitude and addresses for all agencies)
-- [ ] Homogenize data collection
-- [ ] Working on filters rationalisation (in particular JLL)
+- [ ] Homogenize data collection (post-process with pandas or polar)
+- [x] Working on filters rationalisation
 - [x] Working on asynchronous programing
 
 2. Priority 2 :
